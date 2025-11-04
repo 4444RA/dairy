@@ -11,7 +11,6 @@ const firebaseConfig = {
     appId: "1:50167451169:web:5ea9cffde6db860ff7dd60"
 };
 
-// --- UPDATED HABITS LIST ---
 const HABITS = [
     { id: 'sunlight', text: 'Got morning sunlight' },
     { id: 'exercise', text: 'Exercised for 20+ minutes' },
@@ -24,13 +23,10 @@ const HABITS = [
 ];
 const diaryCollectionId = 'public-diary';
 
-// --- INITIALIZE FIREBASE ---
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
-// --- MAIN APP LOGIC ---
 const main = () => {
-    // --- DOM ELEMENTS ---
     const dateInput = document.getElementById('diary-date');
     const entryTextarea = document.getElementById('diary-entry');
     const saveButton = document.getElementById('save-button');
@@ -39,7 +35,6 @@ const main = () => {
     const themeToggle = document.getElementById('theme-toggle');
     const trackerStatsContainer = document.getElementById('tracker-stats');
 
-    // --- FUNCTIONS ---
     const getTodaysDate = () => {
         const today = new Date();
         const offset = today.getTimezoneOffset();
@@ -47,7 +42,7 @@ const main = () => {
     };
 
     const renderChecklist = () => {
-        checklistContainer.innerHTML = ''; // Clear old habits before rendering new ones
+        checklistContainer.innerHTML = '';
         HABITS.forEach(habit => {
             const itemDiv = document.createElement('div');
             itemDiv.className = 'habit-item';
@@ -57,6 +52,7 @@ const main = () => {
     };
 
     const loadEntryForDate = async (dateStr) => {
+        // Unchanged
         if (!dateStr) return;
         entryTextarea.value = 'Loading...';
         const entryRef = doc(db, 'diaries', diaryCollectionId, 'entries', dateStr);
@@ -68,9 +64,7 @@ const main = () => {
                 const habitsData = data.habits || {};
                 HABITS.forEach(habit => {
                     const checkbox = document.getElementById(`habit-${habit.id}`);
-                    if (checkbox) {
-                        checkbox.checked = habitsData[habit.id] || false;
-                    }
+                    if (checkbox) checkbox.checked = habitsData[habit.id] || false;
                 });
             } else {
                 entryTextarea.value = '';
@@ -87,14 +81,13 @@ const main = () => {
     };
 
     const saveEntry = async () => {
+        // Unchanged
         const dateStr = dateInput.value;
         const content = entryTextarea.value;
         const habitsToSave = {};
         HABITS.forEach(habit => {
             const checkbox = document.getElementById(`habit-${habit.id}`);
-            if (checkbox) {
-                habitsToSave[habit.id] = checkbox.checked;
-            }
+            if (checkbox) habitsToSave[habit.id] = checkbox.checked;
         });
         const entryRef = doc(db, 'diaries', diaryCollectionId, 'entries', dateStr);
         try {
@@ -109,6 +102,7 @@ const main = () => {
     };
     
     const updateHabitTracker = async () => {
+        // Unchanged
         trackerStatsContainer.innerHTML = 'Calculating...';
         const habitCounts = {};
         HABITS.forEach(h => habitCounts[h.id] = 0);
@@ -138,6 +132,7 @@ const main = () => {
     };
 
     const setupThemeToggle = () => {
+        // Unchanged
         const currentTheme = localStorage.getItem('theme');
         if (currentTheme === 'dark') {
             document.documentElement.setAttribute('data-theme', 'dark');
@@ -154,16 +149,19 @@ const main = () => {
         });
     };
 
-    const setupCollapsible = () => {
-        const header = document.querySelector('.collapsible-header');
-        const content = document.querySelector('.collapsible-content');
-        header.addEventListener('click', () => {
-            header.classList.toggle('active');
-            if (content.style.maxHeight) {
-                content.style.maxHeight = null;
-            } else {
-                content.style.maxHeight = content.scrollHeight + 'px';
-            }
+    // --- UPDATED to handle MULTIPLE collapsible sections ---
+    const setupCollapsibles = () => {
+        const headers = document.querySelectorAll('.collapsible-header');
+        headers.forEach(header => {
+            header.addEventListener('click', () => {
+                header.classList.toggle('active');
+                const content = header.nextElementSibling; // Get the content div right after the button
+                if (content.style.maxHeight) {
+                    content.style.maxHeight = null;
+                } else {
+                    content.style.maxHeight = content.scrollHeight + 'px';
+                }
+            });
         });
     };
     
@@ -171,12 +169,11 @@ const main = () => {
     dateInput.value = getTodaysDate();
     renderChecklist();
     setupThemeToggle();
-    setupCollapsible();
+    setupCollapsibles(); // Use the new plural function name
     loadEntryForDate(dateInput.value);
     updateHabitTracker();
     dateInput.addEventListener('change', () => loadEntryForDate(dateInput.value));
     saveButton.addEventListener('click', saveEntry);
 };
 
-// --- START THE APP ---
 document.addEventListener('DOMContentLoaded', main);
