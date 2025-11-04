@@ -1,14 +1,7 @@
-// --- 1. IMPORT ONLY FIRESTORE FUNCTIONS ---
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-app.js";
-import { 
-    getFirestore, 
-    doc, 
-    getDoc, 
-    setDoc 
-} from "https://www.gstatic.com/firebasejs/9.15.0/firebase-firestore.js";
+import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-firestore.js";
 
-
-// --- 2. YOUR FIREBASE CONFIGURATION (Stays the same) ---
+// --- CONFIGURATION ---
 const firebaseConfig = {
     apiKey: "AIzaSyAquYjH9mhBtLvPbFfC_K1xizXNruORXng",
     authDomain: "dairy-2139f.firebaseapp.com",
@@ -18,81 +11,63 @@ const firebaseConfig = {
     appId: "1:50167451169:web:5ea9cffde6db860ff7dd60"
 };
 
-// --- NEW: Define our habits. Easy to add more here! ---
 const HABITS = [
     { id: 'sunlight', text: 'Got morning sunlight' },
     { id: 'exercise', text: 'Exercised for 20+ minutes' },
     { id: 'noPhone', text: 'No phone 1 hour before bed' },
     { id: 'read', text: 'Read for 15 minutes' }
 ];
+const diaryCollectionId = 'public-diary';
 
-
-// --- 3. INITIALIZE FIREBASE AND GET REFERENCE TO FIRESTORE ---
+// --- INITIALIZE FIREBASE ---
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
-
-// --- 4. GET DOM ELEMENTS ---
+// --- DOM ELEMENTS ---
 const dateInput = document.getElementById('diary-date');
 const entryTextarea = document.getElementById('diary-entry');
 const saveButton = document.getElementById('save-button');
 const statusMessage = document.getElementById('status-message');
-const checklistContainer = document.getElementById('checklist-container'); // NEW
+const checklistContainer = document.getElementById('checklist-container');
+const themeToggle = document.getElementById('theme-toggle');
+const trackerStatsContainer = document.getElementById('tracker-stats');
 
-
-// --- 5. FIRESTORE (DATABASE) LOGIC ---
-const diaryCollectionId = 'public-diary';
-
-// NEW: Function to create the checklist HTML
-const renderChecklist = () => {
-    HABITS.forEach(habit => {
-        const itemDiv = document.createElement('div');
-        itemDiv.className = 'habit-item';
-
-        const label = document.createElement('label');
-        const checkbox = document.createElement('input');
-        checkbox.type = 'checkbox';
-        checkbox.id = `habit-${habit.id}`;
-        
-        const span = document.createElement('span');
-        span.textContent = habit.text;
-
-        label.appendChild(checkbox);
-        label.appendChild(span);
-        itemDiv.appendChild(label);
-        checklistContainer.appendChild(itemDiv);
-    });
-};
+// --- FUNCTIONS ---
 
 const getTodaysDate = () => {
     const today = new Date();
     const offset = today.getTimezoneOffset();
-    const todayWithOffset = new Date(today.getTime() - (offset * 60 * 1000));
-    return todayWithOffset.toISOString().split('T')[0];
-}
+    return new Date(today.getTime() - (offset * 60 * 1000)).toISOString().split('T')[0];
+};
+
+const renderChecklist = () => {
+    HABITS.forEach(habit => {
+        const itemDiv = document.createElement('div');
+        itemDiv.className = 'habit-item';
+        itemDiv.innerHTML = `
+            <label>
+                <input type="checkbox" id="habit-${habit.id}">
+                <span>${habit.text}</span>
+            </label>
+        `;
+        checklistContainer.appendChild(itemDiv);
+    });
+};
 
 const loadEntryForDate = async (dateStr) => {
     if (!dateStr) return;
     entryTextarea.value = 'Loading...';
     const entryRef = doc(db, 'diaries', diaryCollectionId, 'entries', dateStr);
-    
     try {
         const docSnap = await getDoc(entryRef);
         if (docSnap.exists()) {
             const data = docSnap.data();
-            // Load diary text, default to empty string if not present
             entryTextarea.value = data.content || '';
-
-            // Load habits, default to empty object
             const habitsData = data.habits || {};
             HABITS.forEach(habit => {
-                const checkbox = document.getElementById(`habit-${habit.id}`);
-                // Check the box if the corresponding habit is true, otherwise uncheck it
-                checkbox.checked = habitsData[habit.id] || false;
+                document.getElementById(`habit-${habit.id}`).checked = habitsData[habit.id] || false;
             });
-
         } else {
-            // If no entry exists, clear the textarea and uncheck all boxes
             entryTextarea.value = '';
             HABITS.forEach(habit => {
                 document.getElementById(`habit-${habit.id}`).checked = false;
@@ -108,38 +83,111 @@ const loadEntryForDate = async (dateStr) => {
 const saveEntry = async () => {
     const dateStr = dateInput.value;
     const content = entryTextarea.value;
-    
-    // NEW: Get the state of all checkboxes
     const habitsToSave = {};
     HABITS.forEach(habit => {
-        const checkbox = document.getElementById(`habit-${habit.id}`);
-        habitsToSave[habit.id] = checkbox.checked;
+        habitsToSave[habit.id] = document.getElementById(`habit-${habit.id}`).checked;
     });
 
     const entryRef = doc(db, 'diaries', diaryCollectionId, 'entries', dateStr);
-    
     try {
-        // UPDATED: Save both content and the habits object
-        await setDoc(entryRef, { 
-            content: content,
-            habits: habitsToSave 
-        });
+        await setDoc(entryRef, { content, habits: habitsToSave });
         statusMessage.textContent = 'Saved successfully!';
         setTimeout(() => statusMessage.textContent = '', 3000);
+        updateHabitTracker(); // NEW: Update tracker stats after saving
     } catch (error) {
         console.error("Error saving entry: ", error);
         statusMessage.textContent = 'Error saving entry.';
     }
 };
 
-// --- 6. INITIAL PAGE SETUP ---
-dateInput.value = getTodaysDate();
-renderChecklist(); // Create the checklist on the page
-loadEntryForDate(dateInput.value); // Load today's entry
+// --- NEW: HABIT TRACKER LOGIC ---
+const updateHabitTracker = async () => {
+    trackerStatsContainer.innerHTML = 'Calculating...';
+    const habitCounts = {};
+    HABITS.forEach(h => habitCounts[h.id] = 0);
 
-// --- 7. EVENT LISTENERS ---
-dateInput.addEventListener('change', () => {
+    const promises = [];
+    for (let i = 0; i < 30; i++) {
+        const date = new Date();
+        date.setDate(date.getDate() - i);
+        const dateStr = date.toISOString().split('T')[0];
+        const entryRef = doc(db, 'diaries', diaryCollectionId, 'entries', dateStr);
+        promises.push(getDoc(entryRef));
+    }
+
+    const snapshots = await Promise.all(promises);
+    snapshots.forEach(docSnap => {
+        if (docSnap.exists()) {
+            const habitsData = docSnap.data().habits || {};
+            HABITS.forEach(habit => {
+                if (habitsData[habit.id]) {
+                    habitCounts[habit.id]++;
+                }
+            });
+        }
+    });
+
+    trackerStatsContainer.innerHTML = ''; // Clear container
+    HABITS.forEach(habit => {
+        const count = habitCounts[habit.id];
+        const percentage = Math.round((count / 30) * 100);
+        const itemHTML = `
+            <div class="tracker-item">
+                <div class="tracker-label">
+                    <span>${habit.text}</span>
+                    <span>${count}/30 days</span>
+                </div>
+                <div class="tracker-bar-container">
+                    <div class="tracker-bar" style="width: ${percentage}%;">${percentage}%</div>
+                </div>
+            </div>
+        `;
+        trackerStatsContainer.innerHTML += itemHTML;
+    });
+};
+
+// --- NEW: UI SETUP FUNCTIONS ---
+const setupThemeToggle = () => {
+    const currentTheme = localStorage.getItem('theme');
+    if (currentTheme === 'dark') {
+        document.documentElement.setAttribute('data-theme', 'dark');
+        themeToggle.checked = true;
+    }
+    themeToggle.addEventListener('change', () => {
+        if (themeToggle.checked) {
+            document.documentElement.setAttribute('data-theme', 'dark');
+            localStorage.setItem('theme', 'dark');
+        } else {
+            document.documentElement.setAttribute('data-theme', 'light');
+            localStorage.setItem('theme', 'light');
+        }
+    });
+};
+
+const setupCollapsible = () => {
+    const header = document.querySelector('.collapsible-header');
+    const content = document.querySelector('.collapsible-content');
+    header.addEventListener('click', () => {
+        header.classList.toggle('active');
+        if (content.style.maxHeight) {
+            content.style.maxHeight = null;
+        } else {
+            content.style.maxHeight = content.scrollHeight + 'px';
+        }
+    });
+};
+
+// --- INITIAL PAGE LOAD ---
+const initializeApp = () => {
+    dateInput.value = getTodaysDate();
+    renderChecklist();
+    setupThemeToggle();
+    setupCollapsible();
     loadEntryForDate(dateInput.value);
-});
+    updateHabitTracker();
 
-saveButton.addEventListener('click', saveEntry);
+    dateInput.addEventListener('change', () => loadEntryForDate(dateInput.value));
+    saveButton.addEventListener('click', saveEntry);
+};
+
+initializeApp();
