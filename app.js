@@ -73,8 +73,8 @@ authButton.addEventListener('click', () => {
 const getTodaysDate = () => {
     const today = new Date();
     const offset = today.getTimezoneOffset();
-    const todayWithOffset = new new Date(today.getTime() - (offset * 60 * 1000));
-    return todayWithOffset.toISOString().split('T')[0];
+// CORRECT:
+const todayWithOffset = new Date(today.getTime() - (offset * 60 * 1000));    return todayWithOffset.toISOString().split('T')[0];
 }
 
 dateInput.value = getTodaysDate();
