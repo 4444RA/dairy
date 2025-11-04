@@ -12,21 +12,22 @@
         <h1>My Public Diary</h1>
     </header>
 
-    <!--
-      FIX: The "class='hidden'" has been removed.
-      The diary is now visible immediately when the page loads.
-    -->
     <main id="app-container">
         <div class="controls">
             <label for="diary-date">Select a date:</label>
             <input type="date" id="diary-date">
         </div>
         <textarea id="diary-entry" placeholder="Write your thoughts for the day..."></textarea>
-        <!--
-          FIX: The button has the correct ID that app.js is looking for.
-        -->
         <button id="save-button">Save Entry</button>
         <p id="status-message"></p>
+
+        <!-- NEW SECTION FOR THE CHECKLIST -->
+        <div id="checklist-container">
+            <h2>Daily Habits</h2>
+            <!-- The checklist items will be added here by JavaScript -->
+        </div>
+        <!-- END OF NEW SECTION -->
+
     </main>
 
     <script type="module" src="./app.js"></script>
