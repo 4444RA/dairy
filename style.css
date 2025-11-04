@@ -140,9 +140,9 @@ button:hover {
 
 /* --- NEW: Habit Tracker Styles --- */
 #habit-tracker-container {
-    border-bottom: 1px solid var(--border-color);
-    padding-bottom: 20px;
-    margin-bottom: 20px;
+    border-top: 1px solid var(--border-color); /* Changed from border-bottom */
+    padding-top: 20px; /* Changed from padding-bottom */
+    margin-top: 30px; /* Changed from margin-bottom */
 }
 .tracker-item { margin-bottom: 10px; }
 .tracker-label {
