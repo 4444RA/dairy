@@ -18,7 +18,7 @@ header {
     margin-bottom: 20px;
 }
 
-h1 {
+h1, h2 {
     color: #4a4a4a;
 }
 
@@ -44,7 +44,7 @@ h1 {
 
 #diary-entry {
     width: 100%;
-    height: 300px;
+    height: 200px; /* Made it a bit smaller */
     box-sizing: border-box;
     padding: 10px;
     font-size: 16px;
@@ -72,11 +72,32 @@ button:hover {
     margin-top: 10px;
 }
 
-.hidden {
-    display: none;
-}
-
 #status-message {
     margin-top: 15px;
     color: green;
+}
+
+/* --- NEW STYLES FOR THE CHECKLIST --- */
+#checklist-container {
+    margin-top: 30px;
+    border-top: 1px solid #eee;
+    padding-top: 20px;
+}
+
+.habit-item {
+    display: block; /* Each item on its own line */
+    margin-bottom: 12px;
+    font-size: 18px;
+}
+
+.habit-item label {
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+}
+
+.habit-item input[type="checkbox"] {
+    margin-right: 12px;
+    /* Make checkbox bigger and easier to click */
+    transform: scale(1.3); 
 }
