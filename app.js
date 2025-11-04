@@ -93,14 +93,13 @@ const saveEntry = async () => {
         await setDoc(entryRef, { content, habits: habitsToSave });
         statusMessage.textContent = 'Saved successfully!';
         setTimeout(() => statusMessage.textContent = '', 3000);
-        updateHabitTracker(); // NEW: Update tracker stats after saving
+        updateHabitTracker();
     } catch (error) {
         console.error("Error saving entry: ", error);
         statusMessage.textContent = 'Error saving entry.';
     }
 };
 
-// --- NEW: HABIT TRACKER LOGIC ---
 const updateHabitTracker = async () => {
     trackerStatsContainer.innerHTML = 'Calculating...';
     const habitCounts = {};
@@ -127,7 +126,7 @@ const updateHabitTracker = async () => {
         }
     });
 
-    trackerStatsContainer.innerHTML = ''; // Clear container
+    trackerStatsContainer.innerHTML = '';
     HABITS.forEach(habit => {
         const count = habitCounts[habit.id];
         const percentage = Math.round((count / 30) * 100);
@@ -146,7 +145,6 @@ const updateHabitTracker = async () => {
     });
 };
 
-// --- NEW: UI SETUP FUNCTIONS ---
 const setupThemeToggle = () => {
     const currentTheme = localStorage.getItem('theme');
     if (currentTheme === 'dark') {
@@ -190,4 +188,5 @@ const initializeApp = () => {
     saveButton.addEventListener('click', saveEntry);
 };
 
-initializeApp();
+// THIS IS THE FIX: Wait for the HTML document to be fully loaded before running the app
+document.addEventListener('DOMContentLoaded', initializeApp);
