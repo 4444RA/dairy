@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>My Daily Diary</title>
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="./style.css">  <!-- Added ./ for good practice -->
 </head>
 <body>
 
@@ -23,13 +23,8 @@
         <p id="status-message"></p>
     </main>
 
-    <!-- Firebase SDKs -->
-    <script src="https://www.gstatic.com/firebasejs/9.6.7/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.6.7/firebase-auth-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.6.7/firebase-firestore-compat.js"></script>
-
-    <!-- Our App Script -->
-<!-- CORRECT -->
-<script type="module" src="./app.js"></script>
+    <!-- This is the only script tag you need -->
+    <script type="module" src="./app.js"></script>
+    
 </body>
 </html>
