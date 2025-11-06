@@ -8,14 +8,13 @@ const firebaseConfig = {
     authDomain: "dairy-2139f.firebaseapp.com",
     projectId: "dairy-2139f",
     storageBucket: "dairy-2139f.appspot.com",
-    messagingSenderId: "50167451169",
-    appId: "1:50167451169:web:5ea9cffde6db860ff7dd60"
+    messagingSenderId: "50166451169",
+    appId: "1:50166451169:web:5ea9cffde6db860ff7dd60"
 };
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
 // ----- HABITS -----
-// FIX: Added a specific `shortLabel` to each habit for clarity.
 const HABITS = [
   { id: 'sunlight',         text: 'Got morning sunlight',        shortLabel: 'Sunlight' },
   { id: 'exercise',         text: 'Exercised 20+ min',          shortLabel: 'Exercise' },
@@ -112,8 +111,7 @@ function renderHabitRibbon(habitStates = {}) {
     const pill = document.createElement('div');
     pill.className = 'habit-pill' + (habitStates[h.id] ? ' done' : '');
     pill.dataset.id = h.id;
-    // FIX: Use the new `shortLabel` for the pill text.
-    pill.title = h.text; // Keep the full text as a hover tooltip
+    pill.title = h.text; 
     pill.innerHTML = `<span class="dot"></span><span class="label">${h.shortLabel}</span>`;
     pill.addEventListener('click', () => {
       const newState = !habitStates[h.id];
@@ -128,7 +126,7 @@ function renderHabitRibbon(habitStates = {}) {
 // ---------- Calculate progress percentage ----------
 function calculateProgress(entry) {
   let score = 0;
-  const total = 5; // Total sections: Main Journal, Priorities, Gratitude, Food, Wins
+  const total = 5; 
   if(entry.content && entry.content.trim().length > 10) score++;
   if(Array.isArray(entry.priorities) && entry.priorities.some(p => p.trim())) score++;
   if(Array.isArray(entry.gratitude) && entry.gratitude.some(g => g.trim())) score++;
@@ -400,14 +398,28 @@ function bindUI() {
 
   setSaved(false);
   renderHabitRibbon({});
+  updateMonthlyStatsFromUI(); 
 }
 
 // ---------- Monthly stats summary (mini) ----------
 async function updateMonthlyStatsFromUI() {
   const month = currentCalendarDate.getMonth();
   const year = currentCalendarDate.getFullYear();
+  const daysInMonth = new Date(year, month + 1, 0).getDate();
+  
+  // FIX: This is the new, smarter logic for calculating the denominator.
+  const today = new Date();
+  let daysSoFar;
+  // If we are viewing the current month, only count days up to today.
+  if (year === today.getFullYear() && month === today.getMonth()) {
+    daysSoFar = today.getDate();
+  } else {
+    // For any past month, use the total number of days in that month.
+    daysSoFar = daysInMonth;
+  }
+  // Prevent division by zero if it's the first day of the month.
+  if (daysSoFar === 0) daysSoFar = 1;
 
-  const daysInMonth = new Date(year, month+1, 0).getDate();
   const counts = {}; HABITS.forEach(h => counts[h.id] = 0);
 
   const promises = [];
@@ -429,18 +441,23 @@ async function updateMonthlyStatsFromUI() {
 
   HABITS.forEach(h => {
     const count = counts[h.id];
-    const pct = Math.round((count / daysInMonth) * 100);
+    // FIX: Calculate percentage based on days passed, not total days in month.
+    const pct = Math.round((count / daysSoFar) * 100);
+    
     if(tracker) tracker.innerHTML += `
       <div class="tracker-item">
         <div class="tracker-label" style="display:flex;justify-content:space-between">
-          <span>${h.text}</span><span style="color:var(--muted)">${count}/${daysInMonth}</span>
+          <span>${h.text}</span>
+          <!-- FIX: Show count vs days passed -->
+          <span style="color:var(--muted)">${count}/${daysSoFar}</span>
         </div>
         <div class="tracker-bar-container">
           <div class="tracker-bar" style="width:${pct}%;background:linear-gradient(90deg,var(--accent),var(--accent-2));padding-right:8px;color:#fff;font-weight:700;height:18px;border-radius:10px;display:flex;align-items:center;justify-content:flex-end">${pct}%</div>
         </div>
       </div>`;
-    // FIX: Use the `shortLabel` in the mini stats for consistency.
-    if(mini) mini.innerHTML += `<div class="stat-row"><div>${h.shortLabel}</div><div style="color:var(--muted)">${pct}%</div></div>`;
+      
+    // FIX: Display as a fraction (e.g., 3/5) in the mini stats for clarity.
+    if(mini) mini.innerHTML += `<div class="stat-row"><div>${h.shortLabel}</div><div style="color:var(--muted)">${count}/${daysSoFar}</div></div>`;
   });
 }
 
