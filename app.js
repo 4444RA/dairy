@@ -44,12 +44,9 @@ function initDom(){
   dom.dateInput = $('diary-date');
   dom.journal = $('main-journal');
   dom.saveIndicator = $('save-indicator');
-  dom.progressBar = $('progress-bar');
-  dom.progressLabel = $('progress-label');
   dom.habitRibbon = $('habit-ribbon');
   dom.trackerStats = $('tracker-stats');
   dom.miniStats = $('mini-stats');
-  dom.todaySummary = $('today-summary');
 
   dom.tabDaily = $('tab-daily'); dom.tabCalendar = $('tab-calendar'); dom.tabStats = $('tab-stats');
   dom.calendarPane = $('calendar-pane'); dom.calendarGrid = $('calendar-grid'); dom.monthYearLabel = $('month-year-label');
@@ -123,19 +120,6 @@ function renderHabitRibbon(habitStates = {}) {
   });
 }
 
-// ---------- Calculate progress percentage ----------
-function calculateProgress(entry) {
-  let score = 0;
-  const total = 5; 
-  if(entry.content && entry.content.trim().length > 10) score++;
-  if(Array.isArray(entry.priorities) && entry.priorities.some(p => p.trim())) score++;
-  if(Array.isArray(entry.gratitude) && entry.gratitude.some(g => g.trim())) score++;
-  if(entry.foodLog && entry.foodLog.trim()) score++;
-  if(entry.deepWork && entry.deepWork.trim()) score++; 
-  
-  return Math.round((score / total) * 100);
-}
-
 // ---------- Firebase helpers ----------
 async function saveEntryToFirestore(dateStr, entryData) {
   const entryRef = doc(db, 'diaries', diaryCollectionId, 'entries', dateStr);
@@ -174,7 +158,6 @@ async function loadEntry(dateStr) {
     if ($('deep-work-log')) $('deep-work-log').value = '';
     if ($('food-log-entry')) $('food-log-entry').value = '';
   }
-  updateProgressUI(data || {});
   autosize(dom.journal);
 }
 
@@ -226,20 +209,10 @@ function triggerAutosave(){
     try {
       await saveEntryToFirestore(dateStr, entryData);
       setSaved(true);
-      updateProgressUI(entryData);
     } catch(err){
       console.error('save failed', err);
     }
   }, 900);
-}
-
-// ---------- Progress UI ----------
-function updateProgressUI(entry = {}) {
-  const pct = calculateProgress(entry);
-  dom.progressBar.style.width = pct + '%';
-  dom.progressLabel.textContent = `Today — ${pct}%`;
-  const prioritiesCount = (entry.priorities || []).filter(Boolean).length;
-  dom.todaySummary.textContent = `${pct}% complete • ${prioritiesCount} priorities`;
 }
 
 // ---------- Autosize helper ----------
@@ -367,10 +340,7 @@ function bindUI() {
   document.querySelectorAll('.small-input').forEach(el => {
       el.addEventListener('input', triggerAutosave);
   });
-  $('expand-wins').addEventListener('click', ()=> toggleOptional('wins', true));
-  $('expand-food').addEventListener('click', ()=> toggleOptional('food', true));
-  $('expand-priorities').addEventListener('click', ()=> toggleOptional('priorities', true));
-  $('expand-gratitude').addEventListener('click', ()=> toggleOptional('gratitude', true));
+  
   $('add-priority').addEventListener('click', ()=> addListRow('priorities-list'));
   $('add-gratitude').addEventListener('click', ()=> addListRow('gratitude-list'));
 
@@ -380,17 +350,6 @@ function bindUI() {
 
   dom.prevMonthBtn.addEventListener('click', ()=> { currentCalendarDate.setMonth(currentCalendarDate.getMonth()-1); renderCalendar(); });
   dom.nextMonthBtn.addEventListener('click', ()=> { currentCalendarDate.setMonth(currentCalendarDate.getMonth()+1); renderCalendar(); });
-
-  $('open-checklist').addEventListener('click', ()=> { showPane('calendar'); renderCalendar(); });
-  $('today-button').addEventListener('click', ()=> { dom.dateInput.value = getTodayStr(); loadEntry(getTodayStr()); showPane('daily'); });
-  
-  $('view-calendar').addEventListener('click', () => { showPane('calendar'); renderCalendar(); });
-  $('reset-habits').addEventListener('click', () => {
-      if (confirm('Reset all habits for this day?')) {
-          renderHabitRibbon({}); 
-          triggerAutosave(); 
-      }
-  });
 
   dom.mbDaily.addEventListener('click', () => showPane('daily'));
   dom.mbCalendar.addEventListener('click', () => { showPane('calendar'); renderCalendar(); });
@@ -407,17 +366,13 @@ async function updateMonthlyStatsFromUI() {
   const year = currentCalendarDate.getFullYear();
   const daysInMonth = new Date(year, month + 1, 0).getDate();
   
-  // FIX: This is the new, smarter logic for calculating the denominator.
   const today = new Date();
   let daysSoFar;
-  // If we are viewing the current month, only count days up to today.
   if (year === today.getFullYear() && month === today.getMonth()) {
     daysSoFar = today.getDate();
   } else {
-    // For any past month, use the total number of days in that month.
     daysSoFar = daysInMonth;
   }
-  // Prevent division by zero if it's the first day of the month.
   if (daysSoFar === 0) daysSoFar = 1;
 
   const counts = {}; HABITS.forEach(h => counts[h.id] = 0);
@@ -441,14 +396,12 @@ async function updateMonthlyStatsFromUI() {
 
   HABITS.forEach(h => {
     const count = counts[h.id];
-    // FIX: Calculate percentage based on days passed, not total days in month.
     const pct = Math.round((count / daysSoFar) * 100);
     
     if(tracker) tracker.innerHTML += `
       <div class="tracker-item">
         <div class="tracker-label" style="display:flex;justify-content:space-between">
           <span>${h.text}</span>
-          <!-- FIX: Show count vs days passed -->
           <span style="color:var(--muted)">${count}/${daysSoFar}</span>
         </div>
         <div class="tracker-bar-container">
@@ -456,7 +409,6 @@ async function updateMonthlyStatsFromUI() {
         </div>
       </div>`;
       
-    // FIX: Display as a fraction (e.g., 3/5) in the mini stats for clarity.
     if(mini) mini.innerHTML += `<div class="stat-row"><div>${h.shortLabel}</div><div style="color:var(--muted)">${count}/${daysSoFar}</div></div>`;
   });
 }
