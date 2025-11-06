@@ -16,16 +16,13 @@
     </div>
 
     <div class="header-right">
-      <div class="theme-switch-wrapper">
-        <label class="theme-switch" for="theme-toggle">
-          <input type="checkbox" id="theme-toggle" />
-          <div class="slider round"></div>
-        </label>
-      </div>
+      <!-- FIX: Replaced checkbox with a simple button for the theme toggle -->
+      <button id="theme-toggle" class="theme-btn">🌙</button>
+      
       <nav class="top-nav">
         <button id="tab-daily" class="tab-btn active">Daily</button>
         <button id="tab-calendar" class="tab-btn">Calendar</button>
-        <button id="tab-stats" class="tab-btn">Stats</button>
+        <!-- REMOVED: Stats tab button -->
       </nav>
     </div>
   </header>
@@ -43,12 +40,8 @@
         <textarea id="main-journal" class="main-journal" placeholder="Start writing..."></textarea>
 
         <div class="optional-sections">
-
-          <!-- FIX: Moved Priorities to the top and made it open by default -->
           <div class="optional" data-key="priorities">
-            <!-- The chevron now points up to indicate it's open -->
             <button class="optional-toggle">Priorities <span class="chev">▴</span></button>
-            <!-- The 'hidden' class has been removed -->
             <div class="optional-body">
               <div id="priorities-list" class="priorities-list"></div>
               <button id="add-priority" class="link-btn">+ Add priority</button>
@@ -82,7 +75,7 @@
       <div id="mobile-bottom-nav" class="mobile-bottom">
         <button id="mb-daily" class="mb-btn active">Daily</button>
         <button id="mb-calendar" class="mb-btn">Calendar</button>
-        <button id="mb-stats" class="mb-btn">Stats</button>
+        <!-- REMOVED: Mobile Stats button -->
       </div>
     </section>
 
@@ -106,6 +99,7 @@
         <h2 id="month-year-label"></h2>
         <button id="next-month-btn">▶</button>
       </div>
+      <!-- FIX: This header now corresponds to the grid below it -->
       <div class="calendar-grid-header">
         <div>Sun</div><div>Mon</div><div>Tue</div><div>Wed</div><div>Thu</div><div>Fri</div><div>Sat</div>
       </div>
@@ -113,12 +107,7 @@
     </div>
   </div>
 
-  <div id="stats-pane" class="overlay-pane hidden">
-    <div class="card large">
-      <h2>Monthly Stats</h2>
-      <div id="tracker-stats"></div>
-    </div>
-  </div>
+  <!-- REMOVED: Stats pane div -->
 
   <div id="access-denied-message" class="access-denied hidden">
       <p>Please use your master URL to access the diary.</p>
