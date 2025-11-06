@@ -13,7 +13,6 @@
   <header class="site-header">
     <div class="header-left">
       <h1 class="brand">My Diary & Tracker</h1>
-      <!-- REMOVED: Today's summary text -->
     </div>
 
     <div class="header-right">
@@ -39,14 +38,23 @@
             <input type="date" id="diary-date" class="date-input" />
             <div id="save-indicator" class="save-indicator">Saved</div>
           </div>
-          <!-- REMOVED: Progress bar and label -->
         </div>
 
         <textarea id="main-journal" class="main-journal" placeholder="Start writing..."></textarea>
 
-        <!-- REMOVED: Flow action buttons (Add Wins, Add Food, etc.) -->
-
         <div class="optional-sections">
+
+          <!-- FIX: Moved Priorities to the top and made it open by default -->
+          <div class="optional" data-key="priorities">
+            <!-- The chevron now points up to indicate it's open -->
+            <button class="optional-toggle">Priorities <span class="chev">▴</span></button>
+            <!-- The 'hidden' class has been removed -->
+            <div class="optional-body">
+              <div id="priorities-list" class="priorities-list"></div>
+              <button id="add-priority" class="link-btn">+ Add priority</button>
+            </div>
+          </div>
+
           <div class="optional" data-key="wins">
             <button class="optional-toggle">Wins <span class="chev">▾</span></button>
             <div class="optional-body hidden">
@@ -58,14 +66,6 @@
             <button class="optional-toggle">Food <span class="chev">▾</span></button>
             <div class="optional-body hidden">
               <textarea id="food-log-entry" class="small-input" rows="2" placeholder="Breakfast: ..."></textarea>
-            </div>
-          </div>
-
-          <div class="optional" data-key="priorities">
-            <button class="optional-toggle">Priorities <span class="chev">▾</span></button>
-            <div class="optional-body hidden">
-              <div id="priorities-list" class="priorities-list"></div>
-              <button id="add-priority" class="link-btn">+ Add priority</button>
             </div>
           </div>
 
@@ -90,15 +90,12 @@
       <div class="card compact-card">
         <h3 class="card-title">Habits</h3>
         <div id="habit-ribbon" class="habit-ribbon"></div>
-        <!-- REMOVED: Ribbon action buttons (Open Checklist, Reset) -->
       </div>
 
       <div class="card compact-card" id="mini-stats-card">
         <h3 class="card-title">This Month</h3>
         <div id="mini-stats"></div>
       </div>
-
-      <!-- REMOVED: Quick Actions Card -->
     </aside>
   </main>
 
