@@ -13,7 +13,7 @@
   <header class="site-header">
     <div class="header-left">
       <h1 class="brand">My Diary & Tracker</h1>
-      <div id="today-summary" class="today-summary" aria-hidden="true"></div>
+      <!-- REMOVED: Today's summary text -->
     </div>
 
     <div class="header-right">
@@ -39,20 +39,12 @@
             <input type="date" id="diary-date" class="date-input" />
             <div id="save-indicator" class="save-indicator">Saved</div>
           </div>
-          <div class="progress-wrap">
-            <div id="progress-label">Today — 0%</div>
-            <div class="progress-bar-outer"><div id="progress-bar" class="progress-bar-inner"></div></div>
-          </div>
+          <!-- REMOVED: Progress bar and label -->
         </div>
 
         <textarea id="main-journal" class="main-journal" placeholder="Start writing..."></textarea>
 
-        <div class="flow-actions">
-          <button id="expand-wins" class="mini-btn">Add Wins</button>
-          <button id="expand-food" class="mini-btn">Add Food</button>
-          <button id="expand-priorities" class="mini-btn">Add Priorities</button>
-          <button id="expand-gratitude" class="mini-btn">Add Gratitude</button>
-        </div>
+        <!-- REMOVED: Flow action buttons (Add Wins, Add Food, etc.) -->
 
         <div class="optional-sections">
           <div class="optional" data-key="wins">
@@ -87,7 +79,6 @@
         </div>
       </div>
 
-      <!-- FIX: Removed the confusing 'nav-hidden' class. CSS will now handle visibility. -->
       <div id="mobile-bottom-nav" class="mobile-bottom">
         <button id="mb-daily" class="mb-btn active">Daily</button>
         <button id="mb-calendar" class="mb-btn">Calendar</button>
@@ -99,10 +90,7 @@
       <div class="card compact-card">
         <h3 class="card-title">Habits</h3>
         <div id="habit-ribbon" class="habit-ribbon"></div>
-        <div class="ribbon-actions">
-          <button id="open-checklist" class="link-btn">Open checklist</button>
-          <button id="reset-habits" class="link-btn muted">Reset</button>
-        </div>
+        <!-- REMOVED: Ribbon action buttons (Open Checklist, Reset) -->
       </div>
 
       <div class="card compact-card" id="mini-stats-card">
@@ -110,11 +98,7 @@
         <div id="mini-stats"></div>
       </div>
 
-      <div class="card compact-card" id="quick-actions-card">
-        <h3 class="card-title">Quick</h3>
-        <button id="today-button" class="full-btn">Jump to Today</button>
-        <button id="view-calendar" class="full-btn outline">Open Calendar</button>
-      </div>
+      <!-- REMOVED: Quick Actions Card -->
     </aside>
   </main>
 
