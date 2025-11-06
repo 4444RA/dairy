@@ -135,6 +135,22 @@ async function loadEntryFromFirestore(dateStr) {
   return null;
 }
 
+// FIX: New function to automatically check habits based on content
+function checkAutoHabits(entryData) {
+    if (!entryData) return;
+    entryData.habits = entryData.habits || {};
+
+    const filledPriorities = (entryData.priorities || []).filter(p => p && p.trim() !== '').length;
+    if (filledPriorities >= 3) {
+        entryData.habits.setPriorities = true;
+    }
+
+    const filledGratitudes = (entryData.gratitude || []).filter(g => g && g.trim() !== '').length;
+    if (filledGratitudes >= 3) {
+        entryData.habits.gratitude = true;
+    }
+}
+
 // ---------- UI loading/saving ----------
 async function loadEntry(dateStr) {
   if(!dateStr) return;
@@ -147,7 +163,10 @@ async function loadEntry(dateStr) {
     dom.journal.value = data.content || JOURNAL_TEMPLATE;
     renderList('priorities-list', data.priorities || []);
     renderList('gratitude-list', data.gratitude || []);
+    
+    checkAutoHabits(data); // Apply auto-habit logic before rendering
     renderHabitRibbon(data.habits || {});
+
     if ($('deep-work-log')) $('deep-work-log').value = data.deepWork || '';
     if ($('food-log-entry')) $('food-log-entry').value = data.foodLog || '';
   } else {
@@ -165,7 +184,7 @@ function renderList(containerId, items = []) {
   const wrap = document.getElementById(containerId);
   if(!wrap) return;
   wrap.innerHTML = '';
-  const count = Math.max(1, items.length > 0 ? items.length : 0);
+  const count = Math.max(3, items.length); // Always render at least 3 boxes
   for(let i=0;i<count;i++){
     const v = items[i] || '';
     const txt = document.createElement('textarea');
@@ -204,11 +223,16 @@ function triggerAutosave(){
   setSaved(false);
   debounce(async () => {
     const dateStr = dom.dateInput.value;
-    const entryData = gatherEntry(dateStr);
+    const entryData = gatherEntry();
+    
+    checkAutoHabits(entryData); // Apply auto-habit logic before saving
+    
     saveLocalDraft(dateStr, entryData);
     try {
       await saveEntryToFirestore(dateStr, entryData);
       setSaved(true);
+      // Re-render habits to reflect any automatic changes
+      renderHabitRibbon(entryData.habits); 
     } catch(err){
       console.error('save failed', err);
     }
