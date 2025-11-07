@@ -10,24 +10,18 @@
   <link rel="stylesheet" href="./style.css">
 </head>
 <body>
-  <header class="site-header">
-    <div class="header-left">
-      <h1 class="brand">My Diary & Tracker</h1>
-    </div>
 
-    <div class="header-right">
-      <!-- FIX: Replaced checkbox with a simple button for the theme toggle -->
-      <button id="theme-toggle" class="theme-btn">🌙</button>
-      
-      <nav class="top-nav">
-        <button id="tab-daily" class="tab-btn active">Daily</button>
-        <button id="tab-calendar" class="tab-btn">Calendar</button>
-        <!-- REMOVED: Stats tab button -->
-      </nav>
+  <!-- FIX: Added login overlay -->
+  <div id="login-overlay">
+    <div id="login-box" class="card">
+      <h2>Enter Access Code</h2>
+      <input type="password" id="password-input" placeholder="Password" />
+      <button id="login-button" class="full-btn">Unlock</button>
     </div>
-  </header>
+  </div>
 
-  <main id="app-root">
+  <!-- FIX: App is now hidden by default -->
+  <main id="app-root" class="hidden">
     <section id="left-col" class="pane left-pane">
       <div class="card" id="daily-card">
         <div class="card-header">
@@ -41,7 +35,8 @@
 
         <div class="optional-sections">
           <div class="optional" data-key="priorities">
-            <button class="optional-toggle">Priorities <span class="chev">▴</span></button>
+            <!-- REMOVED: Chevron span -->
+            <button class="optional-toggle">Priorities</button>
             <div class="optional-body">
               <div id="priorities-list" class="priorities-list"></div>
               <button id="add-priority" class="link-btn">+ Add priority</button>
@@ -49,21 +44,21 @@
           </div>
 
           <div class="optional" data-key="wins">
-            <button class="optional-toggle">Wins <span class="chev">▾</span></button>
+            <button class="optional-toggle">Wins</button>
             <div class="optional-body hidden">
-              <textarea id="deep-work-log" class="small-input" rows="2" placeholder="Daily wins / deep-work..."></textarea>
+              <textarea id="deep-work-log" class="small-input" rows="1" placeholder="Daily wins / deep-work..."></textarea>
             </div>
           </div>
 
           <div class="optional" data-key="food">
-            <button class="optional-toggle">Food <span class="chev">▾</span></button>
+            <button class="optional-toggle">Food</button>
             <div class="optional-body hidden">
-              <textarea id="food-log-entry" class="small-input" rows="2" placeholder="Breakfast: ..."></textarea>
+              <textarea id="food-log-entry" class="small-input" rows="1" placeholder="Breakfast: ..."></textarea>
             </div>
           </div>
 
           <div class="optional" data-key="gratitude">
-            <button class="optional-toggle">Gratitude <span class="chev">▾</span></button>
+            <button class="optional-toggle">Gratitude</button>
             <div class="optional-body hidden">
               <div id="gratitude-list" class="priorities-list"></div>
               <button id="add-gratitude" class="link-btn">+ Add gratitude</button>
@@ -75,7 +70,6 @@
       <div id="mobile-bottom-nav" class="mobile-bottom">
         <button id="mb-daily" class="mb-btn active">Daily</button>
         <button id="mb-calendar" class="mb-btn">Calendar</button>
-        <!-- REMOVED: Mobile Stats button -->
       </div>
     </section>
 
@@ -85,9 +79,12 @@
         <div id="habit-ribbon" class="habit-ribbon"></div>
       </div>
 
-      <div class="card compact-card" id="mini-stats-card">
-        <h3 class="card-title">This Month</h3>
-        <div id="mini-stats"></div>
+      <!-- FIX: Restructured "This Month" to be a collapsible section -->
+      <div class="card compact-card optional" data-key="monthly-stats">
+        <button class="optional-toggle">This Month</button>
+        <div id="mini-stats-body" class="optional-body hidden">
+            <div id="mini-stats"></div>
+        </div>
       </div>
     </aside>
   </main>
@@ -99,7 +96,6 @@
         <h2 id="month-year-label"></h2>
         <button id="next-month-btn">▶</button>
       </div>
-      <!-- FIX: This header now corresponds to the grid below it -->
       <div class="calendar-grid-header">
         <div>Sun</div><div>Mon</div><div>Tue</div><div>Wed</div><div>Thu</div><div>Fri</div><div>Sat</div>
       </div>
@@ -107,8 +103,23 @@
     </div>
   </div>
 
-  <!-- REMOVED: Stats pane div -->
+  <div id="access-denied-message" class="access-denied hidden">
+      <p>Please use your master URL to access the diary.</p>
+  </div>
 
+  <header class="site-header">
+    <div class="header-left">
+      <h1 class="brand">My Diary & Tracker</h1>
+    </div>
+
+    <div class="header-right">
+      <button id="theme-toggle" class="theme-btn">🌙</button>
+      <nav class="top-nav">
+        <button id="tab-daily" class="tab-btn active">Daily</button>
+        <button id="tab-calendar" class="tab-btn">Calendar</button>
+      </nav>
+    </div>
+  </header>
 
   <script type="module" src="./app.js"></script>
 </body>
