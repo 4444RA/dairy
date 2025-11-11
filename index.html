@@ -15,7 +15,6 @@
       <h1 class="brand">My Diary & Tracker</h1>
     </div>
     <div class="header-right">
-      <!-- THEME TOGGLE BUTTON REMOVED FROM HERE -->
       <nav class="top-nav">
         <button id="tab-daily" class="tab-btn active">Daily</button>
         <button id="tab-calendar" class="tab-btn">Calendar</button>
@@ -32,7 +31,6 @@
   </div>
 
   <main id="app-root" class="hidden">
-    <!-- The rest of your HTML remains the same -->
     <section id="left-col" class="pane left-pane">
       <div class="card" id="daily-card">
         <div class="card-header">
@@ -76,19 +74,18 @@
         <button id="mb-calendar" class="mb-btn">Calendar</button>
       </div>
     </section>
+
     <aside id="right-col" class="pane right-pane">
       <div class="card compact-card">
         <h3 class="card-title">Habits</h3>
         <div id="habit-ribbon" class="habit-ribbon"></div>
       </div>
-      <div class="card compact-card optional" data-key="monthly-stats">
-        <button class="optional-toggle">This Month</button>
-        <div id="mini-stats-body" class="optional-body hidden">
-            <div id="mini-stats"></div>
-        </div>
-      </div>
+      
+      <!-- "THIS MONTH" SECTION HAS BEEN REMOVED -->
+
     </aside>
   </main>
+
   <div id="calendar-pane" class="overlay-pane hidden">
     <div class="card large">
       <div class="calendar-header">
@@ -103,9 +100,11 @@
       <div id="habit-tracker-container" class="habit-tracker-container"></div>
     </div>
   </div>
+
   <div id="access-denied-message" class="access-denied hidden">
       <p>Please use your master URL to access the diary.</p>
   </div>
+  
   <script type="module" src="./app.js"></script>
 </body>
 </html>
