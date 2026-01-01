@@ -3,43 +3,40 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pro Calisthenics Tracker</title>
+    <title>Detailed 30-Day Tracker</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-
     <header>
-        <h1>30-DAY LEAN & STRONG</h1>
-        <p>Zero Equipment • Detailed Progress Tracking</p>
+        <h1>30-DAY PROGRESS TRACKER</h1>
+        <p>Phase-specific goals and logging</p>
     </header>
 
-    <section class="stats-container">
-        <div class="stats-text">Overall Progress: <span id="progress-text">0/30</span> Days</div>
-        <div class="progress-bar-bg">
-            <div id="progress-bar"></div>
-        </div>
-    </section>
+    <div class="stats-container">
+        <div id="progress-text">Days Completed: 0/30</div>
+        <div class="progress-bar-bg"><div id="progress-bar"></div></div>
+    </div>
 
-    <main class="grid" id="grid"></main>
+    <div class="grid" id="grid"></div>
 
-    <!-- Logging Modal -->
     <div id="modal-overlay" class="hidden">
         <div class="modal">
-            <h2 id="modal-title">Day 1: Upper Body</h2>
-            <div id="exercise-list">
-                <!-- Exercises will be injected here -->
+            <h2 id="modal-title">Day X</h2>
+            <p id="modal-desc" class="description"></p>
+            <div class="exercise-header">
+                <span>EXERCISE</span>
+                <span>TARGET</span>
+                <span>ACTUAL</span>
             </div>
+            <div id="exercise-list"></div>
             <div class="modal-buttons">
-                <button id="save-btn">Save Workout</button>
-                <button id="close-btn">Close</button>
+                <button id="save-btn">SAVE WORKOUT</button>
+                <button id="close-btn">CANCEL</button>
             </div>
         </div>
     </div>
 
-    <footer>
-        <button id="reset-btn">Reset Entire Challenge</button>
-    </footer>
-
+    <button id="reset-btn">Reset All Data</button>
     <script src="app.js"></script>
 </body>
 </html>
