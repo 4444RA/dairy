@@ -1,71 +1,67 @@
 :root {
-    --bg-color: #0f1113;
-    --card-bg: #1a1d21;
-    --primary: #00ff88;
-    --text: #ffffff;
+    --bg: #0a0a0c;
+    --card: #16161a;
+    --primary: #4ade80;
+    --accent: #38bdf8;
+    --text: #f8fafc;
     --text-dim: #94a3b8;
-    --accent: #22d3ee;
 }
 
 body {
     font-family: 'Inter', sans-serif;
-    background-color: var(--bg-color);
-    color: var(--text);
-    margin: 0; padding: 20px;
-    display: flex; flex-direction: column; align-items: center;
+    background: var(--bg); color: var(--text);
+    display: flex; flex-direction: column; align-items: center; padding: 20px;
 }
 
-.stats-container {
-    background: var(--card-bg);
-    padding: 20px; border-radius: 15px;
-    width: 100%; max-width: 500px; margin-bottom: 30px;
-}
-
-.progress-bar-bg { background: #333; height: 8px; border-radius: 4px; margin-top: 10px; }
-#progress-bar { background: var(--primary); width: 0%; height: 100%; border-radius: 4px; transition: 0.5s; }
+.stats-container { width: 100%; max-width: 600px; margin-bottom: 20px; }
+.progress-bar-bg { background: #222; height: 10px; border-radius: 5px; margin-top: 8px; }
+#progress-bar { background: var(--primary); height: 100%; width: 0%; border-radius: 5px; transition: 0.3s; }
 
 .grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
-    gap: 12px; width: 100%; max-width: 800px;
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+    gap: 10px; width: 100%; max-width: 800px;
 }
 
 .day-card {
-    background: var(--card-bg);
-    padding: 15px; border-radius: 12px;
-    text-align: center; cursor: pointer;
-    border: 1px solid #333; transition: 0.2s;
+    background: var(--card); padding: 15px; border-radius: 10px;
+    text-align: center; cursor: pointer; border: 1px solid #333;
 }
 
-.day-card.completed { border-color: var(--primary); background: #12261e; }
-.day-num { display: block; font-size: 1.2rem; font-weight: bold; }
-.day-type { font-size: 0.7rem; color: var(--text-dim); }
+.day-card.completed { border-color: var(--primary); background: #064e3b; }
 
-/* Modal Styles */
+/* Modal */
 .hidden { display: none !important; }
 #modal-overlay {
-    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-    background: rgba(0,0,0,0.85); display: flex; justify-content: center; align-items: center;
-    z-index: 100;
+    position: fixed; inset: 0; background: rgba(0,0,0,0.9);
+    display: flex; align-items: center; justify-content: center; z-index: 100;
 }
 
 .modal {
-    background: var(--card-bg); padding: 25px; border-radius: 20px;
-    width: 90%; max-width: 450px; max-height: 80vh; overflow-y: auto;
+    background: var(--card); width: 95%; max-width: 500px;
+    padding: 20px; border-radius: 15px; max-height: 90vh; overflow-y: auto;
 }
 
-.exercise-item {
-    margin-bottom: 15px; padding-bottom: 10px; border-bottom: 1px solid #333;
+.description { color: var(--accent); font-size: 0.9rem; margin-bottom: 20px; }
+
+.exercise-header {
+    display: grid; grid-template-columns: 2fr 1fr 1fr;
+    font-size: 0.7rem; color: var(--text-dim); font-weight: bold;
+    border-bottom: 1px solid #333; padding-bottom: 5px; margin-bottom: 10px;
 }
 
-.exercise-item label { display: block; font-weight: bold; margin-bottom: 5px; color: var(--accent); }
-.exercise-item input {
-    width: 100%; background: #000; border: 1px solid #444;
-    color: white; padding: 10px; border-radius: 8px; box-sizing: border-box;
+.exercise-row {
+    display: grid; grid-template-columns: 2fr 1fr 1fr;
+    align-items: center; margin-bottom: 15px; gap: 10px;
+}
+
+.ex-name { font-weight: bold; font-size: 0.9rem; }
+.ex-target { font-size: 0.85rem; color: var(--accent); }
+input {
+    background: #000; border: 1px solid #444; color: white;
+    padding: 8px; border-radius: 5px; width: 100%; text-align: center;
 }
 
 .modal-buttons { display: flex; gap: 10px; margin-top: 20px; }
-button { flex: 1; padding: 12px; border-radius: 8px; cursor: pointer; font-weight: bold; border: none; }
-#save-btn { background: var(--primary); color: #000; }
-#close-btn { background: #333; color: white; }
-#reset-btn { background: none; border: 1px solid #ff4444; color: #ff4444; margin-top: 40px; }
+#save-btn { background: var(--primary); color: #000; flex: 2; padding: 12px; font-weight: bold; border-radius: 8px; cursor: pointer; }
+#close-btn { background: #333; color: #fff; flex: 1; border-radius: 8px; cursor: pointer; }
+#reset-btn { margin-top: 40px; background: none; color: #ef4444; border: 1px solid #ef4444; padding: 8px; border-radius: 5px; cursor: pointer; }
