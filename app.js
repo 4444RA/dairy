@@ -14,7 +14,7 @@ const workoutData = {
         }
     ],
     hiit: [
-        { name: "Burpees", target: "45s" }, { name: "High Knees", target: "45s" }, { name: "Mountain Climbers", target: "45s" }, { name: "Plank Jacks", target: "45s" }, { name: "Rest", target: "60s" }
+        { name: "Burpees", target: "1 x 45s" }, { name: "High Knees", target: "1 x 45s" }, { name: "Mountain Climbers", target: "1 x 45s" }, { name: "Plank Jacks", target: "1 x 45s" }, { name: "Rest", target: "1 x 60s" }
     ]
 };
 
@@ -27,21 +27,16 @@ const closeBtn = document.getElementById('close-btn');
 let currentDay = null;
 let progressData = JSON.parse(localStorage.getItem('janShredData')) || {};
 let habitData = JSON.parse(localStorage.getItem('janHabitData')) || { water: false, steps: false, protein: false };
-
-// --- DRAG AND DROP STATE ---
-let draggedItemIndex = null;
-// Initialize schedule from local storage or generate default
 let userSchedule = JSON.parse(localStorage.getItem('janShredSchedule')) || generateDefaultSchedule();
 
 function generateDefaultSchedule() {
     const schedule = [];
-    for (let i = 1; i <= 30; i++) {
-        const weekDay = (i - 1) % 7;
-        let type = "rest";
-        if (weekDay === 0 || weekDay === 3) type = "upper";
-        else if (weekDay === 1 || weekDay === 5) type = "lower";
-        else if (weekDay === 4) type = "hiit";
-        schedule.push(type);
+    for (let i = 0; i < 30; i++) {
+        const weekDay = i % 7;
+        if (weekDay === 0 || weekDay === 3) schedule.push("upper");
+        else if (weekDay === 1 || weekDay === 5) schedule.push("lower");
+        else if (weekDay === 4) schedule.push("hiit");
+        else schedule.push("rest");
     }
     return schedule;
 }
@@ -50,12 +45,10 @@ function getDayInfo(dayIndex) {
     const dayNum = dayIndex + 1;
     const phaseIdx = Math.floor(dayIndex / 10);
     const type = userSchedule[dayIndex];
-    
     let label = "Active Recovery", icon = "🧘", list = [];
     if (type === "upper") { label = "Upper Body"; icon = "💪"; list = workoutData.phases[phaseIdx].upper; }
     else if (type === "lower") { label = "Lower Body"; icon = "🦵"; list = workoutData.phases[phaseIdx].lower; }
     else if (type === "hiit") { label = "Full Body HIIT"; icon = "🔥"; list = workoutData.hiit; }
-
     return { type, label, icon, list, phase: phaseIdx + 1, dayNum };
 }
 
@@ -67,80 +60,38 @@ function renderGrid() {
         card.className = `day-card ${progressData[info.dayNum] ? 'completed' : ''}`;
         card.draggable = true;
         card.dataset.index = index;
-        
         card.innerHTML = `
             <div style="font-size:0.6rem; color:var(--text-dim)">PHASE ${info.phase}</div>
             <div style="font-weight:bold; font-size:1.1rem; margin:4px 0">${info.icon} Day ${info.dayNum}</div>
             <div style="font-size:0.65rem; color:var(--accent); font-weight:800">${info.label.toUpperCase()}</div>
         `;
-
-        // Click to open
         card.onclick = () => openModal(info.dayNum, index);
-
-        // Drag Events
-        card.addEventListener('dragstart', handleDragStart);
-        card.addEventListener('dragover', handleDragOver);
+        card.addEventListener('dragstart', e => { draggedItemIndex = index; e.dataTransfer.effectAllowed = 'move'; });
+        card.addEventListener('dragover', e => { e.preventDefault(); card.classList.add('drag-over'); });
+        card.addEventListener('dragleave', () => card.classList.remove('drag-over'));
         card.addEventListener('drop', handleDrop);
-        card.addEventListener('dragend', handleDragEnd);
-
         grid.appendChild(card);
     });
     updateStats();
 }
 
-// --- DRAG HANDLERS ---
-function handleDragStart(e) {
-    draggedItemIndex = this.dataset.index;
-    this.style.opacity = '0.4';
-    e.dataTransfer.effectAllowed = 'move';
-}
-
-function handleDragOver(e) {
-    e.preventDefault();
-    e.dataTransfer.dropEffect = 'move';
-    this.classList.add('drag-over');
-}
-
-function handleDragEnd() {
-    this.style.opacity = '1';
-    const cards = document.querySelectorAll('.day-card');
-    cards.forEach(card => card.classList.remove('drag-over'));
-}
+let draggedItemIndex = null;
 function handleDrop(e) {
     e.preventDefault();
-    const fromIdx = parseInt(draggedItemIndex);
+    const fromIdx = draggedItemIndex;
     const toIdx = parseInt(this.dataset.index);
-
     if (fromIdx !== toIdx) {
-        // 1. Swap the Workout Types in the schedule
         const tempType = userSchedule[fromIdx];
         userSchedule[fromIdx] = userSchedule[toIdx];
         userSchedule[toIdx] = tempType;
 
-        // 2. Swap the Progress Data (the reps/logs)
-        const fromDayNum = fromIdx + 1;
-        const toDayNum = toIdx + 1;
-        
-        const tempProgress = progressData[fromDayNum];
-        
-        // Handle the swap of actual logged data
-        if (progressData[toDayNum]) {
-            progressData[fromDayNum] = progressData[toDayNum];
-        } else {
-            delete progressData[fromDayNum];
-        }
+        const fromDay = fromIdx + 1, toDay = toIdx + 1;
+        const tempProg = progressData[fromDay];
+        if (progressData[toDay]) progressData[fromDay] = progressData[toDay]; else delete progressData[fromDay];
+        if (tempProg) progressData[toDay] = tempProg; else delete progressData[toDay];
 
-        if (tempProgress) {
-            progressData[toDayNum] = tempProgress;
-        } else {
-            delete progressData[toDayNum];
-        }
-
-        // 3. Save both to LocalStorage
         localStorage.setItem('janShredSchedule', JSON.stringify(userSchedule));
         localStorage.setItem('janShredData', JSON.stringify(progressData));
-        
-        // 4. Refresh the UI
         renderGrid();
     }
 }
@@ -150,29 +101,40 @@ function openModal(dayNum, scheduleIndex) {
     const info = getDayInfo(scheduleIndex);
     document.getElementById('modal-title').innerText = `Day ${dayNum}: ${info.label}`;
     document.getElementById('modal-tag').innerText = `PHASE ${info.phase}`;
-    document.getElementById('modal-desc').innerText = info.type === 'rest' ? "Focus on 30 mins of walking or light yoga." : "Perform all exercises. Rest 60s between sets.";
     
-    // Find last data for the SAME type
+    // Find Last Data
     let lastData = null;
     for(let i = dayNum - 2; i >= 0; i--) {
-        if(userSchedule[i] === info.type && progressData[i+1]) {
-            lastData = progressData[i+1];
-            break;
-        }
+        if(userSchedule[i] === info.type && progressData[i+1]) { lastData = progressData[i+1]; break; }
     }
 
     exerciseList.innerHTML = '';
-    const listToUse = info.type === "rest" ? [{name: "Walking/Yoga", target: "30m"}] : info.list;
+    const listToUse = info.type === "rest" ? [{name: "Walking/Yoga", target: "1 x 30m"}] : info.list;
     
     listToUse.forEach(ex => {
         const row = document.createElement('div');
-        row.className = 'exercise-row';
-        const lastVal = lastData ? (lastData[ex.name] || '-') : '-';
+        row.className = 'exercise-block';
+        
+        // Determine number of sets from target string (e.g. "3 x 12" -> 3)
+        const setMatch = ex.target.match(/^(\d+)/);
+        const numSets = setMatch ? parseInt(setMatch[1]) : 1;
+        
+        const lastValArray = lastData ? lastData[ex.name] : null;
+        const currentValArray = progressData[dayNum] ? progressData[dayNum][ex.name] : [];
+
+        let inputsHtml = '';
+        for(let s = 0; s < numSets; s++) {
+            const val = currentValArray && currentValArray[s] ? currentValArray[s] : '';
+            inputsHtml += `<input type="text" placeholder="S${s+1}" data-ex="${ex.name}" data-set="${s}" value="${val}">`;
+        }
+
         row.innerHTML = `
-            <span style="font-weight:bold">${ex.name}</span>
-            <span style="color:var(--accent)">${ex.target}</span>
-            <span style="color:var(--text-dim); text-align:center">${lastVal}</span>
-            <input type="text" placeholder="Reps" data-key="${ex.name}" value="${progressData[dayNum]?.[ex.name] || ''}">
+            <div class="ex-info">
+                <span class="ex-name">${ex.name}</span>
+                <span class="ex-target">${ex.target}</span>
+                <small class="ex-last">Last: ${lastValArray ? lastValArray.join(', ') : '-'}</small>
+            </div>
+            <div class="set-inputs">${inputsHtml}</div>
         `;
         exerciseList.appendChild(row);
     });
@@ -180,18 +142,23 @@ function openModal(dayNum, scheduleIndex) {
 }
 
 saveBtn.onclick = () => {
-    const inputs = exerciseList.querySelectorAll('input');
+    const blocks = exerciseList.querySelectorAll('.exercise-block');
     let dayResults = {};
     let hasValue = false;
-    inputs.forEach(input => { 
-        dayResults[input.dataset.key] = input.value; 
-        if(input.value) hasValue = true;
+
+    blocks.forEach(block => {
+        const inputs = block.querySelectorAll('input');
+        const exName = inputs[0].dataset.ex;
+        const sets = [];
+        inputs.forEach(input => {
+            sets.push(input.value);
+            if(input.value) hasValue = true;
+        });
+        dayResults[exName] = sets;
     });
 
     if(hasValue) {
-        if (!progressData[currentDay]) {
-            confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } });
-        }
+        if (!progressData[currentDay]) confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } });
         progressData[currentDay] = dayResults;
         localStorage.setItem('janShredData', JSON.stringify(progressData));
     }
@@ -205,9 +172,14 @@ function updateStats() {
     document.getElementById('progress-bar').style.width = `${(done/30)*100}%`;
     
     let totalReps = 0;
-    Object.values(progressData).forEach(d => Object.values(d).forEach(v => {
-        const n = parseInt(v); if(!isNaN(n)) totalReps += n;
-    }));
+    Object.values(progressData).forEach(day => {
+        Object.values(day).forEach(setArray => {
+            setArray.forEach(val => {
+                const n = parseInt(val);
+                if(!isNaN(n)) totalReps += n;
+            });
+        });
+    });
     document.getElementById('total-reps').innerText = totalReps.toLocaleString();
 
     let streak = 0;
@@ -215,21 +187,14 @@ function updateStats() {
     document.getElementById('streak-count').innerText = streak;
 }
 
+// Habit Logic
 document.querySelectorAll('.habit-check').forEach(check => {
     const id = check.id.split('-')[1];
     check.checked = habitData[id];
-    check.onchange = () => {
-        habitData[id] = check.checked;
-        localStorage.setItem('janHabitData', JSON.stringify(habitData));
-    };
+    check.onchange = () => { habitData[id] = check.checked; localStorage.setItem('janHabitData', JSON.stringify(habitData)); };
 });
 
 closeBtn.onclick = () => modal.classList.add('hidden');
-document.getElementById('reset-btn').onclick = () => { 
-    if(confirm("Reset everything?")) { 
-        localStorage.clear(); 
-        location.reload(); 
-    }
-};
+document.getElementById('reset-btn').onclick = () => { if(confirm("Reset everything?")) { localStorage.clear(); location.reload(); }};
 
 renderGrid();
