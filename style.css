@@ -9,31 +9,18 @@
 }
 
 body {
-    font-family: 'Inter', -apple-system, sans-serif;
+    font-family: 'Inter', sans-serif;
     background: var(--bg); color: var(--text);
     margin: 0; padding: 20px; display: flex; flex-direction: column; align-items: center;
 }
 
 header { width: 100%; max-width: 800px; text-align: center; margin-bottom: 30px; }
-h1 { margin: 0; font-size: 2.5rem; letter-spacing: -1px; color: var(--primary); }
+h1 { margin: 0; font-size: 2.5rem; color: var(--primary); letter-spacing: -1px; }
 
-/* Stats & Habits */
-.stats-grid {
-    display: grid; grid-template-columns: repeat(3, 1fr);
-    gap: 15px; margin: 20px 0;
-}
-.stat-item { background: var(--card); padding: 15px; border-radius: 12px; border: 1px solid #334155; }
-.stat-item span { display: block; font-size: 1.5rem; font-weight: 800; color: var(--accent); }
-.stat-item label { font-size: 0.7rem; text-transform: uppercase; color: var(--text-dim); }
-
-.habit-bar {
-    background: #0ea5e911; border: 1px solid #0ea5e933;
-    padding: 12px; border-radius: 50px; display: flex; 
-    justify-content: center; gap: 15px; font-size: 0.8rem; margin-bottom: 20px;
-}
-
-.progress-container { width: 100%; }
-.progress-bar-bg { background: #1e293b; height: 12px; border-radius: 6px; overflow: hidden; }
+/* Progress Section */
+.progress-section { width: 100%; margin-top: 20px; }
+.progress-label { display: flex; justify-content: space-between; font-size: 0.7rem; font-weight: 800; color: var(--text-dim); margin-bottom: 8px; }
+.progress-bar-bg { background: #1e293b; height: 10px; border-radius: 5px; overflow: hidden; }
 #progress-bar { background: linear-gradient(90deg, var(--primary), var(--accent)); height: 100%; width: 0%; transition: 0.5s ease; }
 
 /* Grid */
@@ -43,10 +30,10 @@ h1 { margin: 0; font-size: 2.5rem; letter-spacing: -1px; color: var(--primary); 
 }
 .day-card {
     background: var(--card); padding: 20px 10px; border-radius: 15px;
-    text-align: center; cursor: pointer; border: 2px solid #334155; transition: 0.2s;
+    text-align: center; cursor: grab; border: 2px solid #334155; transition: 0.2s;
 }
-.day-card:hover { transform: translateY(-3px); border-color: var(--accent); }
 .day-card.completed { border-color: var(--primary); background: #064e3b44; }
+.day-card.drag-over { border: 2px dashed var(--accent); transform: scale(1.05); }
 
 /* Modal */
 .hidden { display: none !important; }
@@ -57,109 +44,30 @@ h1 { margin: 0; font-size: 2.5rem; letter-spacing: -1px; color: var(--primary); 
 .modal {
     background: var(--card); width: 95%; max-width: 500px;
     padding: 25px; border-radius: 20px; border: 1px solid #475569;
+    max-height: 90vh; overflow-y: auto;
 }
-.phase-tag { 
-    display: inline-block; background: var(--accent); color: #000; 
-    padding: 2px 10px; border-radius: 20px; font-size: 0.7rem; font-weight: bold; margin-bottom: 10px;
-}
-.description { color: var(--text-dim); font-size: 0.9rem; margin-bottom: 20px; }
 
-.exercise-header, .exercise-row {
-    display: grid; grid-template-columns: 2fr 1.5fr 1fr 1fr;
-    gap: 10px; align-items: center; margin-bottom: 12px; font-size: 0.85rem;
-}
-.exercise-header { border-bottom: 1px solid #334155; padding-bottom: 8px; color: var(--text-dim); font-weight: bold; }
+.exercise-block { padding-bottom: 15px; border-bottom: 1px solid #334155; margin-bottom: 15px; }
+.ex-info { display: flex; flex-direction: column; margin-bottom: 10px; }
+.ex-name { font-weight: bold; }
+.ex-target { color: var(--accent); font-size: 0.8rem; font-weight: 800; }
+.ex-last { color: var(--text-dim); font-size: 0.7rem; }
 
-input[type="text"] {
+.set-inputs { display: flex; gap: 8px; flex-wrap: wrap; }
+.set-inputs input {
     background: #0f172a; border: 1px solid #334155; color: white;
-    padding: 8px; border-radius: 6px; width: 100%; text-align: center;
+    padding: 10px; border-radius: 8px; width: 55px; text-align: center;
+}
+
+/* Modal Habits */
+.modal-habits { margin-top: 20px; padding-top: 20px; border-top: 1px dashed #334155; }
+.habit-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px; }
+.habit-grid label {
+    background: #0f172a; padding: 10px; border-radius: 8px; font-size: 0.8rem;
+    display: flex; align-items: center; gap: 8px; border: 1px solid #334155; cursor: pointer;
 }
 
 .modal-buttons { display: flex; gap: 10px; margin-top: 25px; }
 #save-btn { background: var(--primary); color: #0f172a; flex: 2; padding: 14px; font-weight: bold; border-radius: 10px; border: none; cursor: pointer; }
 #close-btn { background: #334155; color: white; flex: 1; border-radius: 10px; border: none; cursor: pointer; }
 #reset-btn { margin: 40px auto; background: none; color: var(--danger); border: 1px solid var(--danger); padding: 10px 20px; border-radius: 8px; cursor: pointer; display: block; }
-
-
-
-/* Add to your existing CSS */
-
-.day-card {
-    /* ... existing styles ... */
-    cursor: grab; /* Change cursor to indicate draggability */
-    user-select: none; /* Prevent text selection while dragging */
-}
-
-.day-card:active {
-    cursor: grabbing;
-}
-
-/* Visual cue when a card is being hovered over during a drag */
-.day-card.drag-over {
-    border: 2px dashed var(--accent);
-    transform: scale(1.05);
-    background: #1e293b;
-}
-
-
-/* ... keep your previous root and header styles ... */
-
-.day-card {
-    cursor: grab;
-    user-select: none;
-    transition: 0.2s;
-}
-.day-card.drag-over {
-    border: 2px dashed var(--accent);
-    transform: scale(1.05);
-}
-
-/* Modal Exercise Styling */
-#exercise-list {
-    display: flex;
-    flex-direction: column;
-    gap: 20px;
-    margin-top: 20px;
-}
-
-.exercise-block {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-    padding-bottom: 15px;
-    border-bottom: 1px solid #334155;
-}
-
-.ex-info {
-    display: flex;
-    flex-direction: column;
-}
-
-.ex-name { font-weight: bold; font-size: 1rem; color: var(--text); }
-.ex-target { color: var(--accent); font-size: 0.8rem; font-weight: 800; }
-.ex-last { color: var(--text-dim); font-size: 0.75rem; margin-top: 2px; }
-
-.set-inputs {
-    display: flex;
-    gap: 8px;
-    flex-wrap: wrap;
-}
-
-.set-inputs input {
-    background: #0f172a;
-    border: 1px solid #334155;
-    color: white;
-    padding: 10px;
-    border-radius: 8px;
-    width: 60px; /* Small boxes for sets */
-    text-align: center;
-    font-size: 0.9rem;
-}
-
-.set-inputs input:focus {
-    border-color: var(--primary);
-    outline: none;
-}
-
-/* Update Exercise Header (Hide the old one since we use blocks now) */
-.exercise-header { display: none; }
