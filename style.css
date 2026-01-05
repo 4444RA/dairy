@@ -100,3 +100,66 @@ input[type="text"] {
     transform: scale(1.05);
     background: #1e293b;
 }
+
+
+/* ... keep your previous root and header styles ... */
+
+.day-card {
+    cursor: grab;
+    user-select: none;
+    transition: 0.2s;
+}
+.day-card.drag-over {
+    border: 2px dashed var(--accent);
+    transform: scale(1.05);
+}
+
+/* Modal Exercise Styling */
+#exercise-list {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    margin-top: 20px;
+}
+
+.exercise-block {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding-bottom: 15px;
+    border-bottom: 1px solid #334155;
+}
+
+.ex-info {
+    display: flex;
+    flex-direction: column;
+}
+
+.ex-name { font-weight: bold; font-size: 1rem; color: var(--text); }
+.ex-target { color: var(--accent); font-size: 0.8rem; font-weight: 800; }
+.ex-last { color: var(--text-dim); font-size: 0.75rem; margin-top: 2px; }
+
+.set-inputs {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.set-inputs input {
+    background: #0f172a;
+    border: 1px solid #334155;
+    color: white;
+    padding: 10px;
+    border-radius: 8px;
+    width: 60px; /* Small boxes for sets */
+    text-align: center;
+    font-size: 0.9rem;
+}
+
+.set-inputs input:focus {
+    border-color: var(--primary);
+    outline: none;
+}
+
+/* Update Exercise Header (Hide the old one since we use blocks now) */
+.exercise-header { display: none; }
