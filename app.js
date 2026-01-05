@@ -106,17 +106,41 @@ function handleDragEnd() {
     const cards = document.querySelectorAll('.day-card');
     cards.forEach(card => card.classList.remove('drag-over'));
 }
-
 function handleDrop(e) {
     e.preventDefault();
-    const targetIndex = this.dataset.index;
-    if (draggedItemIndex !== targetIndex) {
-        // Swap types in the schedule
-        const temp = userSchedule[draggedItemIndex];
-        userSchedule[draggedItemIndex] = userSchedule[targetIndex];
-        userSchedule[targetIndex] = temp;
+    const fromIdx = parseInt(draggedItemIndex);
+    const toIdx = parseInt(this.dataset.index);
+
+    if (fromIdx !== toIdx) {
+        // 1. Swap the Workout Types in the schedule
+        const tempType = userSchedule[fromIdx];
+        userSchedule[fromIdx] = userSchedule[toIdx];
+        userSchedule[toIdx] = tempType;
+
+        // 2. Swap the Progress Data (the reps/logs)
+        const fromDayNum = fromIdx + 1;
+        const toDayNum = toIdx + 1;
         
+        const tempProgress = progressData[fromDayNum];
+        
+        // Handle the swap of actual logged data
+        if (progressData[toDayNum]) {
+            progressData[fromDayNum] = progressData[toDayNum];
+        } else {
+            delete progressData[fromDayNum];
+        }
+
+        if (tempProgress) {
+            progressData[toDayNum] = tempProgress;
+        } else {
+            delete progressData[toDayNum];
+        }
+
+        // 3. Save both to LocalStorage
         localStorage.setItem('janShredSchedule', JSON.stringify(userSchedule));
+        localStorage.setItem('janShredData', JSON.stringify(progressData));
+        
+        // 4. Refresh the UI
         renderGrid();
     }
 }
