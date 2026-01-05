@@ -3,9 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>30-Day Lean & Fit Challenge</title>
+    <title>January Shred - Tracker</title>
     <link rel="stylesheet" href="style.css">
-    <!-- Confetti Library -->
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
 </head>
 <body>
@@ -13,21 +12,14 @@
         <h1>JANUARY SHRED</h1>
         <p>Hybrid Calisthenics & HIIT</p>
         
-        <div class="stats-grid">
-            <div class="stat-item"><span id="streak-count">0</span><label>Day Streak</label></div>
-            <div class="stat-item"><span id="total-reps">0</span><label>Total Reps</label></div>
-            <div class="stat-item"><span id="progress-percent">0%</span><label>Complete</label></div>
-        </div>
-
-        <div class="habit-bar">
-            <span>Daily Habits:</span>
-            <label><input type="checkbox" class="habit-check" id="habit-water"> 3L Water</label>
-            <label><input type="checkbox" class="habit-check" id="habit-steps"> 8k Steps</label>
-            <label><input type="checkbox" class="habit-check" id="habit-protein"> Clean Eating</label>
-        </div>
-
-        <div class="progress-container">
-            <div class="progress-bar-bg"><div id="progress-bar"></div></div>
+        <div class="progress-section">
+            <div class="progress-label">
+                <span>CHALLENGE PROGRESS</span>
+                <span id="progress-percent">0%</span>
+            </div>
+            <div class="progress-bar-bg">
+                <div id="progress-bar"></div>
+            </div>
         </div>
     </header>
 
@@ -38,18 +30,22 @@
         <div class="modal">
             <h2 id="modal-title">Day X</h2>
             <div id="modal-tag" class="phase-tag">Phase 1</div>
-            <p id="modal-desc" class="description"></p>
             
-            <div class="exercise-header">
-                <span>EXERCISE</span>
-                <span>GOAL</span>
-                <span>LAST</span>
-                <span>ACTUAL</span>
+            <div id="exercise-list">
+                <!-- Exercises and Sets injected here -->
             </div>
-            <div id="exercise-list"></div>
+
+            <div class="modal-habits">
+                <h3>Daily Habits</h3>
+                <div class="habit-grid">
+                    <label><input type="checkbox" id="modal-habit-water"> 💧 3L Water</label>
+                    <label><input type="checkbox" id="modal-habit-steps"> 👟 8k Steps</label>
+                    <label><input type="checkbox" id="modal-habit-protein"> 🥗 Clean Eating</label>
+                </div>
+            </div>
             
             <div class="modal-buttons">
-                <button id="save-btn">LOG WORKOUT</button>
+                <button id="save-btn">SAVE LOG</button>
                 <button id="close-btn">CANCEL</button>
             </div>
         </div>
