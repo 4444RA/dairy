@@ -79,3 +79,24 @@ input[type="text"] {
 #save-btn { background: var(--primary); color: #0f172a; flex: 2; padding: 14px; font-weight: bold; border-radius: 10px; border: none; cursor: pointer; }
 #close-btn { background: #334155; color: white; flex: 1; border-radius: 10px; border: none; cursor: pointer; }
 #reset-btn { margin: 40px auto; background: none; color: var(--danger); border: 1px solid var(--danger); padding: 10px 20px; border-radius: 8px; cursor: pointer; display: block; }
+
+
+
+/* Add to your existing CSS */
+
+.day-card {
+    /* ... existing styles ... */
+    cursor: grab; /* Change cursor to indicate draggability */
+    user-select: none; /* Prevent text selection while dragging */
+}
+
+.day-card:active {
+    cursor: grabbing;
+}
+
+/* Visual cue when a card is being hovered over during a drag */
+.day-card.drag-over {
+    border: 2px dashed var(--accent);
+    transform: scale(1.05);
+    background: #1e293b;
+}
