@@ -1,57 +1,24 @@
 const workoutData = {
     phases: [
-        { // PHASE 1: FOUNDATION
-            upper: [
-                { name: "Push-ups", target: "3 x Max" },
-                { name: "Incline Rows (on Pole)", target: "3 x 10" }, // ADDED PULL
-                { name: "Chair Dips", target: "3 x 12" },
-                { name: "Mtn Climbers", target: "3 x 45s" }
-            ],
-            lower: [
-                { name: "Air Squats", target: "3 x 20" },
-                { name: "Reverse Lunges", target: "3 x 12/leg" },
-                { name: "Glute Bridges", target: "3 x 20" },
-                { name: "Plank Jacks", target: "3 x 45s" }
-            ]
+        { // Phase 1: Foundation (Pole Rows added for back width)
+            upper: [{name:"Push-ups", target:"3 x Max"}, {name:"Pole Rows", target:"3 x 10"}, {name:"Chair Dips", target:"3 x 12"}, {name:"Mtn Climbers", target:"3 x 45s"}],
+            lower: [{name:"Air Squats", target:"3 x 20"}, {name:"Reverse Lunges", target:"3 x 12/leg"}, {name:"Glute Bridges", target:"3 x 20"}, {name:"Plank Jacks", target:"3 x 45s"}]
         },
-        { // PHASE 2: THE GRIND
-            upper: [
-                { name: "Diamond Pushups", target: "3 x 10" },
-                { name: "Wide Grip Rows (Pole)", target: "3 x 12" }, // ADDED PULL
-                { name: "Pike Pushups", target: "3 x 8" },
-                { name: "Burpees", target: "3 x 10" }
-            ],
-            lower: [
-                { name: "Bulgarian Squats", target: "3 x 10/leg" },
-                { name: "Wall Sit", target: "3 x 60s" },
-                { name: "Calf Raises", target: "3 x 25" },
-                { name: "Jump Squats", target: "3 x 15" }
-            ]
+        { // Phase 2: The Grind
+            upper: [{name:"Diamond Pushups", target:"3 x 10"}, {name:"Wide Pole Rows", target:"3 x 12"}, {name:"Pike Pushups", target:"3 x 8"}, {name:"Burpees", target:"3 x 10"}],
+            lower: [{name:"Bulgarian Squats", target:"3 x 10/leg"}, {name:"Wall Sit", target:"3 x 60s"}, {name:"Calf Raises", target:"3 x 25"}, {name:"Jump Squats", target:"3 x 15"}]
         },
-        { // PHASE 3: SHRED
-            upper: [
-                { name: "Decline Pushups", target: "4 x 12" },
-                { name: "Chin-ups (or Low Row)", target: "3 x 8" }, // ADDED PULL
-                { name: "Plank to Pushup", target: "3 x 12" },
-                { name: "Burpee + Pushup", target: "3 x 10" }
-            ],
-            lower: [
-                { name: "Assisted Pistol Squat", target: "3 x 5/leg" },
-                { name: "Cossack Squat", target: "3 x 12" },
-                { name: "Single Leg Bridge", target: "3 x 15/leg" },
-                { name: "Broad Jumps", target: "3 x 10" }
-            ]
+        { // Phase 3: Shred
+            upper: [{name:"Decline Pushups", target:"4 x 12"}, {name:"Close Pole Rows", target:"3 x 8"}, {name:"Plank to Pushup", target:"3 x 12"}, {name:"Burpee + Pushup", target:"3 x 10"}],
+            lower: [{name:"Assisted Pistol Squat", target:"3 x 5/leg"}, {name:"Cossack Squat", target:"3 x 12"}, {name:"Single Leg Bridge", target:"3 x 15/leg"}, {name:"Broad Jumps", target:"3 x 10"}]
         }
     ],
-    hiit: [
-        { name: "Burpees", target: "3 x 45s" },
-        { name: "High Knees", target: "3 x 45s" },
-        { name: "Mountain Climbers", target: "3 x 45s" },
-        { name: "Plank Jacks", target: "3 x 45s" },
-        { name: "Rest", target: "3 x 60s" }
+    hiit: [ // 3 Rounds for fat burning
+        {name:"Burpees", target:"3 x 45s"}, {name:"High Knees", target:"3 x 45s"}, {name:"Mtn Climbers", target:"3 x 45s"}, {name:"Plank Jacks", target:"3 x 45s"}, {name:"Rest", target:"3 x 60s"}
     ]
 };
 
+// State Management
 let progressData = JSON.parse(localStorage.getItem('janShredData')) || {};
 let userSchedule = JSON.parse(localStorage.getItem('janShredSchedule')) || generateDefaultSchedule();
 let currentDay = null;
@@ -113,8 +80,8 @@ function handleDrop(e) {
     const fromIdx = draggedItemIndex;
     const toIdx = parseInt(this.dataset.index);
     if (fromIdx === toIdx) return;
-
-    // Swap Schedule
+    
+    // Swap types
     [userSchedule[fromIdx], userSchedule[toIdx]] = [userSchedule[toIdx], userSchedule[fromIdx]];
     
     // Swap Data
@@ -122,7 +89,7 @@ function handleDrop(e) {
     const tempProg = progressData[fromDay];
     if (progressData[toDay]) progressData[fromDay] = progressData[toDay]; else delete progressData[fromDay];
     if (tempProg) progressData[toDay] = tempProg; else delete progressData[toDay];
-
+    
     localStorage.setItem('janShredSchedule', JSON.stringify(userSchedule));
     localStorage.setItem('janShredData', JSON.stringify(progressData));
     renderGrid();
@@ -135,13 +102,11 @@ function openModal(dayNum, index) {
     
     document.getElementById('modal-title').innerText = `Day ${dayNum}: ${info.label}`;
     document.getElementById('modal-tag').innerText = `PHASE ${info.phase}`;
-    
-    // Set Habits
     document.getElementById('modal-habit-water').checked = dayData.habits?.water || false;
     document.getElementById('modal-habit-steps').checked = dayData.habits?.steps || false;
     document.getElementById('modal-habit-protein').checked = dayData.habits?.protein || false;
 
-    // Find Last
+    // Last performance lookup
     let lastData = null;
     for(let i = index - 1; i >= 0; i--) {
         if(userSchedule[i] === info.type && progressData[i+1]) { lastData = progressData[i+1].exercises; break; }
@@ -180,7 +145,6 @@ saveBtn.onclick = () => {
         exercises[name] = sets;
         if (sets.some(s => s !== "")) hasVal = true;
     });
-
     const habits = {
         water: document.getElementById('modal-habit-water').checked,
         steps: document.getElementById('modal-habit-steps').checked,
@@ -194,7 +158,6 @@ saveBtn.onclick = () => {
     } else {
         delete progressData[currentDay];
     }
-
     localStorage.setItem('janShredData', JSON.stringify(progressData));
     modal.classList.add('hidden');
     renderGrid();
@@ -206,57 +169,31 @@ function updateStats() {
     document.getElementById('progress-bar').style.width = `${percent}%`;
 }
 
-closeBtn.onclick = () => modal.classList.add('hidden');
-document.getElementById('reset-btn').onclick = () => { if(confirm("Reset everything?")) { localStorage.clear(); location.reload(); }};
-renderGrid();
-
-
-// --- EXPORT DATA ---
+// Backups
 document.getElementById('export-btn').onclick = () => {
-    // Combine logs and custom schedule into one object
-    const backupData = {
-        logs: JSON.parse(localStorage.getItem('janShredData')),
-        schedule: JSON.parse(localStorage.getItem('janShredSchedule'))
-    };
-
-    const dataStr = JSON.stringify(backupData, null, 2);
-    const dataUri = 'data:application/json;charset=utf-8,' + encodeURIComponent(dataStr);
-
-    const exportFileDefaultName = `january-shred-backup-${new Date().toISOString().slice(0,10)}.json`;
-
-    const linkElement = document.createElement('a');
-    linkElement.setAttribute('href', dataUri);
-    linkElement.setAttribute('download', exportFileDefaultName);
-    linkElement.click();
+    const backup = { logs: progressData, schedule: userSchedule };
+    const blob = new Blob([JSON.stringify(backup, null, 2)], {type : 'application/json'});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = `shred-backup-${new Date().toISOString().slice(0,10)}.json`;
+    a.click();
 };
 
-// --- IMPORT DATA ---
 const fileInput = document.getElementById('file-input');
-const importBtn = document.getElementById('import-btn');
-
-importBtn.onclick = () => fileInput.click(); // Trigger hidden input
-
+document.getElementById('import-btn').onclick = () => fileInput.click();
 fileInput.onchange = (e) => {
     const file = e.target.files[0];
-    if (!file) return;
-
     const reader = new FileReader();
     reader.onload = (event) => {
-        try {
-            const importedData = JSON.parse(event.target.result);
-            
-            if (importedData.logs && importedData.schedule) {
-                if (confirm("This will overwrite your current progress. Continue?")) {
-                    localStorage.setItem('janShredData', JSON.stringify(importedData.logs));
-                    localStorage.setItem('janShredSchedule', JSON.stringify(importedData.schedule));
-                    location.reload(); // Refresh to show imported data
-                }
-            } else {
-                alert("Invalid backup file.");
-            }
-        } catch (err) {
-            alert("Error reading file.");
+        const data = JSON.parse(event.target.result);
+        if (confirm("Importing will overwrite your current progress. Proceed?")) {
+            localStorage.setItem('janShredData', JSON.stringify(data.logs));
+            localStorage.setItem('janShredSchedule', JSON.stringify(data.schedule));
+            location.reload();
         }
     };
     reader.readAsText(file);
 };
+
+closeBtn.onclick = () => modal.classList.add('hidden');
+renderGrid();
