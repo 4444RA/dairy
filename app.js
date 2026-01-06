@@ -1,25 +1,54 @@
 const workoutData = {
     phases: [
-        { // Phase 1: Foundation
-            upper: [{name:"Push-ups", target:"3 x Max"}, {name:"Superman Hold", target:"3 x 30s"}, {name:"Chair Dips", target:"3 x 12"}, {name:"Mtn Climbers", target:"3 x 45s"}],
-            lower: [{name:"Air Squats", target:"3 x 20"}, {name:"Reverse Lunges", target:"3 x 12/leg"}, {name:"Glute Bridges", target:"3 x 20"}, {name:"Plank Jacks", target:"3 x 45s"}]
+        { // PHASE 1: FOUNDATION
+            upper: [
+                { name: "Push-ups", target: "3 x Max" },
+                { name: "Incline Rows (on Pole)", target: "3 x 10" }, // ADDED PULL
+                { name: "Chair Dips", target: "3 x 12" },
+                { name: "Mtn Climbers", target: "3 x 45s" }
+            ],
+            lower: [
+                { name: "Air Squats", target: "3 x 20" },
+                { name: "Reverse Lunges", target: "3 x 12/leg" },
+                { name: "Glute Bridges", target: "3 x 20" },
+                { name: "Plank Jacks", target: "3 x 45s" }
+            ]
         },
-        { // Phase 2: The Grind
-            upper: [{name:"Diamond Pushups", target:"3 x 10"}, {name:"Pike Pushups", target:"3 x 8"}, {name:"Incline Rows", target:"3 x 12"}, {name:"Burpees", target:"3 x 10"}],
-            lower: [{name:"Bulgarian Squats", target:"3 x 10/leg"}, {name:"Wall Sit", target:"3 x 60s"}, {name:"Calf Raises", target:"3 x 25"}, {name:"Jump Squats", target:"3 x 15"}]
+        { // PHASE 2: THE GRIND
+            upper: [
+                { name: "Diamond Pushups", target: "3 x 10" },
+                { name: "Wide Grip Rows (Pole)", target: "3 x 12" }, // ADDED PULL
+                { name: "Pike Pushups", target: "3 x 8" },
+                { name: "Burpees", target: "3 x 10" }
+            ],
+            lower: [
+                { name: "Bulgarian Squats", target: "3 x 10/leg" },
+                { name: "Wall Sit", target: "3 x 60s" },
+                { name: "Calf Raises", target: "3 x 25" },
+                { name: "Jump Squats", target: "3 x 15" }
+            ]
         },
-        { // Phase 3: Shred
-            upper: [{name:"Decline Pushups", target:"4 x 12"}, {name:"Pseudo Planche Lean", target:"4 x 20s"}, {name:"Plank to Pushup", target:"3 x 12"}, {name:"Burpee + Pushup", target:"3 x 10"}],
-            lower: [{name:"Assisted Pistol Squat", target:"3 x 5/leg"}, {name:"Cossack Squat", target:"3 x 12"}, {name:"Single Leg Bridge", target:"3 x 15/leg"}, {name:"Broad Jumps", target:"3 x 10"}]
+        { // PHASE 3: SHRED
+            upper: [
+                { name: "Decline Pushups", target: "4 x 12" },
+                { name: "Chin-ups (or Low Row)", target: "3 x 8" }, // ADDED PULL
+                { name: "Plank to Pushup", target: "3 x 12" },
+                { name: "Burpee + Pushup", target: "3 x 10" }
+            ],
+            lower: [
+                { name: "Assisted Pistol Squat", target: "3 x 5/leg" },
+                { name: "Cossack Squat", target: "3 x 12" },
+                { name: "Single Leg Bridge", target: "3 x 15/leg" },
+                { name: "Broad Jumps", target: "3 x 10" }
+            ]
         }
     ],
-    // UPDATED: Now set to 3 Rounds for HIIT
     hiit: [
-        {name:"Burpees", target:"3 x 45s"}, 
-        {name:"High Knees", target:"3 x 45s"}, 
-        {name:"Mountain Climbers", target:"3 x 45s"}, 
-        {name:"Plank Jacks", target:"3 x 45s"}, 
-        {name:"Rest", target:"3 x 60s"}
+        { name: "Burpees", target: "3 x 45s" },
+        { name: "High Knees", target: "3 x 45s" },
+        { name: "Mountain Climbers", target: "3 x 45s" },
+        { name: "Plank Jacks", target: "3 x 45s" },
+        { name: "Rest", target: "3 x 60s" }
     ]
 };
 
