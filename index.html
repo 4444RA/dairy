@@ -3,14 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>January Shred - Tracker</title>
+    <title>January Shred - 30 Day Tracker</title>
     <link rel="stylesheet" href="style.css">
+    <!-- Confetti for motivation -->
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
 </head>
 <body>
     <header>
         <h1>JANUARY SHRED</h1>
-        <p>Hybrid Calisthenics & HIIT</p>
+        <p>Calisthenics & HIIT • Beginner Foundation</p>
         
         <div class="progress-section">
             <div class="progress-label">
@@ -40,7 +41,7 @@
                 <div class="habit-grid">
                     <label><input type="checkbox" id="modal-habit-water"> 💧 3L Water</label>
                     <label><input type="checkbox" id="modal-habit-steps"> 👟 8k Steps</label>
-                    <label><input type="checkbox" id="modal-habit-protein"> 🥗 Clean Eating</label>
+                    <label><input type="checkbox" id="modal-habit-protein"> 🥗 140g Protein</label>
                 </div>
             </div>
             
@@ -51,13 +52,12 @@
         </div>
     </div>
 
-
-<div class="backup-controls">
-    <button id="export-btn">💾 Export Backup</button>
-    <button id="import-btn">📂 Import Backup</button>
-    <!-- Hidden input for file picking -->
-    <input type="file" id="file-input" style="display: none;" accept=".json">
-</div>
+    <!-- Backup Controls -->
+    <div class="backup-controls">
+        <button id="export-btn">💾 Export Backup</button>
+        <button id="import-btn">📂 Import Backup</button>
+        <input type="file" id="file-input" style="display: none;" accept=".json">
+    </div>
 
     <script src="app.js"></script>
 </body>
