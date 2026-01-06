@@ -180,3 +180,54 @@ function updateStats() {
 closeBtn.onclick = () => modal.classList.add('hidden');
 document.getElementById('reset-btn').onclick = () => { if(confirm("Reset everything?")) { localStorage.clear(); location.reload(); }};
 renderGrid();
+
+
+// --- EXPORT DATA ---
+document.getElementById('export-btn').onclick = () => {
+    // Combine logs and custom schedule into one object
+    const backupData = {
+        logs: JSON.parse(localStorage.getItem('janShredData')),
+        schedule: JSON.parse(localStorage.getItem('janShredSchedule'))
+    };
+
+    const dataStr = JSON.stringify(backupData, null, 2);
+    const dataUri = 'data:application/json;charset=utf-8,' + encodeURIComponent(dataStr);
+
+    const exportFileDefaultName = `january-shred-backup-${new Date().toISOString().slice(0,10)}.json`;
+
+    const linkElement = document.createElement('a');
+    linkElement.setAttribute('href', dataUri);
+    linkElement.setAttribute('download', exportFileDefaultName);
+    linkElement.click();
+};
+
+// --- IMPORT DATA ---
+const fileInput = document.getElementById('file-input');
+const importBtn = document.getElementById('import-btn');
+
+importBtn.onclick = () => fileInput.click(); // Trigger hidden input
+
+fileInput.onchange = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (event) => {
+        try {
+            const importedData = JSON.parse(event.target.result);
+            
+            if (importedData.logs && importedData.schedule) {
+                if (confirm("This will overwrite your current progress. Continue?")) {
+                    localStorage.setItem('janShredData', JSON.stringify(importedData.logs));
+                    localStorage.setItem('janShredSchedule', JSON.stringify(importedData.schedule));
+                    location.reload(); // Refresh to show imported data
+                }
+            } else {
+                alert("Invalid backup file.");
+            }
+        } catch (err) {
+            alert("Error reading file.");
+        }
+    };
+    reader.readAsText(file);
+};
