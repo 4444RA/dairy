@@ -1,19 +1,26 @@
 const workoutData = {
     phases: [
-        { // Phase 1
+        { // Phase 1: Foundation
             upper: [{name:"Push-ups", target:"3 x Max"}, {name:"Superman Hold", target:"3 x 30s"}, {name:"Chair Dips", target:"3 x 12"}, {name:"Mtn Climbers", target:"3 x 45s"}],
             lower: [{name:"Air Squats", target:"3 x 20"}, {name:"Reverse Lunges", target:"3 x 12/leg"}, {name:"Glute Bridges", target:"3 x 20"}, {name:"Plank Jacks", target:"3 x 45s"}]
         },
-        { // Phase 2
+        { // Phase 2: The Grind
             upper: [{name:"Diamond Pushups", target:"3 x 10"}, {name:"Pike Pushups", target:"3 x 8"}, {name:"Incline Rows", target:"3 x 12"}, {name:"Burpees", target:"3 x 10"}],
             lower: [{name:"Bulgarian Squats", target:"3 x 10/leg"}, {name:"Wall Sit", target:"3 x 60s"}, {name:"Calf Raises", target:"3 x 25"}, {name:"Jump Squats", target:"3 x 15"}]
         },
-        { // Phase 3
+        { // Phase 3: Shred
             upper: [{name:"Decline Pushups", target:"4 x 12"}, {name:"Pseudo Planche Lean", target:"4 x 20s"}, {name:"Plank to Pushup", target:"3 x 12"}, {name:"Burpee + Pushup", target:"3 x 10"}],
             lower: [{name:"Assisted Pistol Squat", target:"3 x 5/leg"}, {name:"Cossack Squat", target:"3 x 12"}, {name:"Single Leg Bridge", target:"3 x 15/leg"}, {name:"Broad Jumps", target:"3 x 10"}]
         }
     ],
-    hiit: [{name:"Burpees", target:"1 x 45s"}, {name:"High Knees", target:"1 x 45s"}, {name:"Mountain Climbers", target:"1 x 45s"}, {name:"Plank Jacks", target:"1 x 45s"}, {name:"Rest", target:"1 x 60s"}]
+    // UPDATED: Now set to 3 Rounds for HIIT
+    hiit: [
+        {name:"Burpees", target:"3 x 45s"}, 
+        {name:"High Knees", target:"3 x 45s"}, 
+        {name:"Mountain Climbers", target:"3 x 45s"}, 
+        {name:"Plank Jacks", target:"3 x 45s"}, 
+        {name:"Rest", target:"3 x 60s"}
+    ]
 };
 
 let progressData = JSON.parse(localStorage.getItem('janShredData')) || {};
