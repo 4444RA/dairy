@@ -3,19 +3,137 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Shred Challenge Tracker</title>
-    <link rel="stylesheet" href="style.css">
+    <title>Shred Tracker 2026</title>
+    <!-- Confetti Library -->
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
+    
+    <style>
+        :root {
+            --bg: #0f172a;
+            --card: #1e293b;
+            --card-hover: #334155;
+            --primary: #10b981;  /* Green */
+            --accent: #38bdf8;   /* Blue */
+            --today: #f59e0b;    /* Orange */
+            --text: #f8fafc;
+            --text-dim: #94a3b8;
+        }
+
+        body {
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            background: var(--bg); color: var(--text);
+            margin: 0; padding: 20px;
+            display: flex; flex-direction: column; align-items: center;
+            min-height: 100vh;
+        }
+
+        /* HEADER */
+        header { width: 100%; max-width: 600px; margin-bottom: 20px; }
+        .header-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+        h1 { font-size: 1.8rem; color: var(--primary); margin: 0; letter-spacing: -1px; text-transform: uppercase;}
+        .icon-btn { background: none; border: 1px solid var(--card-hover); color: var(--text-dim); padding: 6px 12px; border-radius: 6px; cursor: pointer; font-size: 0.8rem; transition: 0.2s;}
+        .icon-btn:hover { color: var(--text); border-color: var(--accent); }
+
+        #current-month-display { font-size: 1.2rem; font-weight: 700; color: var(--text); margin-bottom: 15px; }
+
+        /* STATS */
+        .stats-row { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-bottom: 25px; }
+        .stat-box { background: var(--card); padding: 15px 10px; border-radius: 12px; text-align: center; border: 1px solid var(--card-hover); }
+        .stat-val { display: block; font-size: 1.4rem; font-weight: 800; color: var(--accent); margin-bottom: 4px; }
+        .stat-label { font-size: 0.65rem; color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.5px; }
+
+        /* CALENDAR */
+        .week-header { 
+            display: grid; grid-template-columns: repeat(7, 1fr); 
+            width: 100%; max-width: 600px; text-align: center; 
+            font-size: 0.75rem; color: var(--text-dim); margin-bottom: 8px; font-weight: 600;
+        }
+        .calendar-grid {
+            display: grid; grid-template-columns: repeat(7, 1fr);
+            gap: 6px; width: 100%; max-width: 600px;
+        }
+
+        .cal-day {
+            background: var(--card); aspect-ratio: 0.9/1; 
+            border-radius: 8px; padding: 4px; position: relative;
+            border: 1px solid transparent; cursor: pointer; transition: 0.2s;
+            display: flex; flex-direction: column; justify-content: space-between;
+        }
+        .cal-day:hover { transform: translateY(-2px); border-color: var(--card-hover); }
+        .cal-day.empty { background: transparent; cursor: default; border: none; }
+        
+        /* Status Colors */
+        .cal-day.today { border: 1px solid var(--today); box-shadow: 0 0 8px rgba(245, 158, 11, 0.2); }
+        .cal-day.completed { background: rgba(16, 185, 129, 0.15); border: 1px solid var(--primary); }
+        .cal-day.rest { opacity: 0.4; }
+        .cal-day.pre-start { opacity: 0.2; pointer-events: none; } /* Grays out days before start date */
+
+        .day-num { font-size: 0.75rem; font-weight: bold; padding-left: 2px; }
+        .day-workout { font-size: 0.65rem; color: var(--accent); font-weight: 700; line-height: 1.1; text-align: center;}
+        .day-check { font-size: 0.9rem; text-align: right; min-height: 1rem; }
+
+        /* MODAL */
+        .hidden { display: none !important; }
+        .overlay {
+            position: fixed; inset: 0; background: rgba(0,0,0,0.85);
+            display: flex; align-items: center; justify-content: center; z-index: 100; backdrop-filter: blur(4px);
+        }
+        .modal {
+            background: #1e293b; width: 90%; max-width: 450px;
+            padding: 25px; border-radius: 16px; border: 1px solid #475569;
+            max-height: 85vh; overflow-y: auto; box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+        }
+        
+        .modal-header { margin-bottom: 20px; border-bottom: 1px solid var(--card-hover); padding-bottom: 15px; }
+        .modal-title-row { display: flex; justify-content: space-between; align-items: center; }
+        .modal-date { font-size: 1.2rem; font-weight: bold; color: var(--text); }
+        .phase-tag { background: var(--accent); color: #000; padding: 3px 10px; border-radius: 12px; font-size: 0.7rem; font-weight: 800; }
+        .workout-name { color: var(--primary); margin: 5px 0 0 0; font-size: 1rem; }
+
+        /* Exercises */
+        .exercise-list { margin-bottom: 20px; }
+        .exercise-block { background: #0f172a; padding: 10px; border-radius: 8px; margin-bottom: 10px; border: 1px solid var(--card-hover); }
+        .ex-header { display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 0.9rem; font-weight: 600; }
+        .ex-target { color: var(--accent); font-size: 0.8rem; }
+        
+        .set-inputs { display: flex; gap: 8px; }
+        .set-inputs input { 
+            flex: 1; background: #1e293b; border: 1px solid #475569; 
+            color: white; padding: 8px; border-radius: 6px; text-align: center; font-weight: bold;
+        }
+
+        /* Habits & Buttons */
+        .habit-section { margin-top: 15px; background: #0f172a; padding: 15px; border-radius: 8px; }
+        .habit-row { display: flex; justify-content: space-between; gap: 10px; }
+        .habit-label { 
+            background: #1e293b; flex: 1; padding: 10px; border-radius: 6px; 
+            font-size: 0.75rem; cursor: pointer; display: flex; align-items: center; gap: 5px; border: 1px solid #334155; 
+        }
+        .habit-label input { accent-color: var(--primary); }
+
+        .modal-buttons { display: flex; gap: 10px; margin-top: 20px; }
+        button { font-family: inherit; font-size: 0.9rem; transition: 0.2s; }
+        button:active { transform: scale(0.98); }
+        .btn-primary { flex: 2; background: var(--primary); color: #0f172a; padding: 14px; border: none; border-radius: 8px; font-weight: 800; cursor: pointer; }
+        .btn-secondary { flex: 1; background: #334155; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; }
+
+        /* Settings Modal Specifics */
+        .settings-group { margin-bottom: 20px; }
+        .settings-group label { display: block; color: var(--text-dim); font-size: 0.8rem; margin-bottom: 5px; }
+        .settings-group input { 
+            width: 100%; padding: 10px; background: #0f172a; border: 1px solid var(--card-hover); 
+            color: white; border-radius: 8px; font-family: inherit; box-sizing: border-box;
+        }
+    </style>
 </head>
 <body>
+
     <header>
         <div class="header-top">
-            <h1>SHRED TRACKER</h1>
+            <h1>🔥 SHRED 2026</h1>
             <button id="settings-btn" class="icon-btn">⚙️ Settings</button>
         </div>
-        <div id="current-month-display">February 2025</div>
         
-        <!-- Stats Row -->
         <div class="stats-row">
             <div class="stat-box">
                 <span class="stat-val" id="streak-val">0</span>
@@ -30,71 +148,324 @@
                 <span class="stat-label">Program Day</span>
             </div>
         </div>
+
+        <div id="current-month-display">Loading...</div>
+
+        <!-- Days of Week -->
+        <div class="week-header">
+            <div>SUN</div><div>MON</div><div>TUE</div><div>WED</div><div>THU</div><div>FRI</div><div>SAT</div>
+        </div>
+
+        <!-- The Calendar -->
+        <div class="calendar-grid" id="calendar-grid"></div>
     </header>
 
-    <!-- Days of Week Header -->
-    <div class="week-header">
-        <div>Sun</div><div>Mon</div><div>Tue</div><div>Wed</div><div>Thu</div><div>Fri</div><div>Sat</div>
-    </div>
-
-    <!-- The Calendar Grid -->
-    <div class="calendar-grid" id="calendar-grid"></div>
-
-    <!-- Settings Modal -->
-    <div id="settings-modal" class="hidden overlay">
-        <div class="modal settings-box">
-            <h3>Configuration</h3>
-            <label>Program Start Date:</label>
-            <input type="date" id="start-date-input">
-            <p class="small-text">Set this to Today (Feb 17) to make today "Day 1" of the workout plan.</p>
-            <div class="modal-buttons">
-                <button id="save-settings-btn">Save & Reload</button>
-                <button id="close-settings-btn">Cancel</button>
-            </div>
-            <hr>
-            <div class="backup-controls">
-                <button id="export-btn">💾 Backup Data</button>
-                <button id="import-btn">📂 Restore Data</button>
-                <input type="file" id="file-input" hidden accept=".json">
-            </div>
-        </div>
-    </div>
-
-    <!-- Workout Logging Modal -->
+    <!-- Workout Modal -->
     <div id="workout-modal" class="hidden overlay">
         <div class="modal">
             <div class="modal-header">
-                <h2 id="modal-date-title">Feb 17</h2>
-                <span id="modal-program-day" class="phase-tag">Day 1 - Phase 1</span>
-            </div>
-            <h3 id="workout-type-title">Upper Body</h3>
-
-            <div id="exercise-list"></div>
-
-            <div class="modal-extras">
-                <div class="habit-section">
-                    <h4>Daily Wins</h4>
-                    <div class="habit-grid">
-                        <label><input type="checkbox" id="habit-water"> 💧 3L Water</label>
-                        <label><input type="checkbox" id="habit-steps"> 👟 8k Steps</label>
-                        <label><input type="checkbox" id="habit-protein"> 🥗 Protein</label>
-                    </div>
+                <div class="modal-title-row">
+                    <div class="modal-date" id="modal-date-display">Feb 17</div>
+                    <div class="phase-tag" id="modal-phase-tag">Day 1</div>
                 </div>
-                
-                <div class="tracking-section">
-                    <h4>Session Details</h4>
-                    <label>Energy Level (1-10): <input type="number" id="energy-rating" min="1" max="10" value="7"></label>
-                    <textarea id="workout-notes" placeholder="How did it feel? Added weight? Soreness?"></textarea>
+                <h3 class="workout-name" id="modal-workout-name">Upper Body</h3>
+            </div>
+
+            <div id="exercise-list" class="exercise-list"></div>
+
+            <div class="habit-section">
+                <div style="font-size:0.8rem; color:gray; margin-bottom:8px">DAILY WINS</div>
+                <div class="habit-row">
+                    <label class="habit-label"><input type="checkbox" id="habit-water"> 💧 3L Water</label>
+                    <label class="habit-label"><input type="checkbox" id="habit-steps"> 👟 8k Steps</label>
+                    <label class="habit-label"><input type="checkbox" id="habit-protein"> 🥗 Protein</label>
                 </div>
             </div>
             
             <div class="modal-buttons">
-                <button id="save-log-btn">COMPLETE SESSION</button>
-                <button id="close-log-btn">CLOSE</button>
+                <button class="btn-primary" id="save-log-btn">COMPLETE SESSION</button>
+                <button class="btn-secondary" id="close-log-btn">CANCEL</button>
             </div>
         </div>
     </div>
 
-    <script src="app.js"></script>
+    <!-- Settings Modal -->
+    <div id="settings-modal" class="hidden overlay">
+        <div class="modal">
+            <h2>⚙️ Configuration</h2>
+            <div class="settings-group">
+                <label>Program Start Date</label>
+                <input type="date" id="start-date-input">
+                <p style="font-size:0.75rem; color:#64748b; margin-top:5px">
+                    Set this to <strong>Today</strong> (Feb 17) to make today "Day 1".
+                </p>
+            </div>
+            <div class="modal-buttons">
+                <button class="btn-primary" id="save-settings-btn">SAVE & REFRESH</button>
+                <button class="btn-secondary" id="close-settings-btn">CANCEL</button>
+            </div>
+            <hr style="border:0; border-top:1px solid #334155; margin:20px 0;">
+            <div class="settings-group">
+                <label>Data Management</label>
+                <button class="icon-btn" id="reset-btn" style="width:100%; border-color: #ef4444; color:#ef4444;">⚠️ Reset All Data</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- DATA STRUCTURES ---
+        const workoutData = {
+            phases: [
+                { // Phase 1: Foundation
+                    upper: [{name:"Push-ups", target:"3 x Max"}, {name:"Pole Rows", target:"3 x 10"}, {name:"Chair Dips", target:"3 x 12"}, {name:"Mtn Climbers", target:"3 x 45s"}],
+                    lower: [{name:"Air Squats", target:"3 x 20"}, {name:"Rev Lunges", target:"3 x 12"}, {name:"Glute Bridge", target:"3 x 20"}, {name:"Plank", target:"3 x 45s"}]
+                },
+                { // Phase 2: Grind
+                    upper: [{name:"Diamond Push", target:"3 x 10"}, {name:"Wide Rows", target:"3 x 12"}, {name:"Pike Pushups", target:"3 x 8"}, {name:"Burpees", target:"3 x 10"}],
+                    lower: [{name:"Bulgarian Sqt", target:"3 x 10"}, {name:"Wall Sit", target:"3 x 60s"}, {name:"Calf Raises", target:"3 x 25"}, {name:"Jump Squats", target:"3 x 15"}]
+                },
+                { // Phase 3: Shred
+                    upper: [{name:"Decline Push", target:"4 x 12"}, {name:"Close Rows", target:"3 x 8"}, {name:"Plank-Pushup", target:"3 x 12"}, {name:"Burpee+Push", target:"3 x 10"}],
+                    lower: [{name:"Pistol Squat", target:"3 x 5"}, {name:"Cossack Sqt", target:"3 x 12"}, {name:"1-Leg Bridge", target:"3 x 15"}, {name:"Broad Jumps", target:"3 x 10"}]
+                }
+            ],
+            hiit: [ {name:"Burpees", target:"45s"}, {name:"High Knees", target:"45s"}, {name:"Mtn Climbers", target:"45s"}, {name:"Rest", target:"60s"} ]
+        };
+
+        // --- STATE & INIT ---
+        const today = new Date(); // Uses System Time (2026)
+        let logs = JSON.parse(localStorage.getItem('shred26_logs')) || {};
+        let settings = JSON.parse(localStorage.getItem('shred26_settings')) || { 
+            // Default start date to today so "Day 1" is today
+            startDate: today.toISOString().split('T')[0] 
+        };
+        let currentModalDateStr = null;
+
+        // Initialize when DOM is ready
+        document.addEventListener('DOMContentLoaded', () => {
+            // Set input to current setting
+            document.getElementById('start-date-input').value = settings.startDate;
+            
+            renderCalendar();
+            updateStats();
+        });
+
+        // --- CORE LOGIC ---
+        function getProgramInfo(dateStr) {
+            const start = new Date(settings.startDate);
+            const current = new Date(dateStr);
+            
+            // Calculate difference in days
+            const diffTime = current - start;
+            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)); 
+            
+            // Before Start Date
+            if (diffDays < 0) return { type: 'pre', label: 'Waiting', dayNum: 0 };
+
+            const dayNum = diffDays + 1; // Day 1, Day 2...
+            
+            // Weekly Cycle: 1=Upper, 2=Lower, 3=Rest, 4=Upper, 5=HIIT, 6=Lower, 0=Rest
+            // We use (dayNum % 7) to find position in week
+            const cycle = dayNum % 7; 
+            
+            let type = 'rest', label = 'Recovery / Yoga', list = [];
+            const phaseIdx = Math.floor((dayNum - 1) / 10); // 0, 1, or 2
+            const phase = workoutData.phases[Math.min(phaseIdx, 2)];
+
+            if (cycle === 1 || cycle === 4) { type = 'upper'; label = 'Upper Body'; list = phase.upper; }
+            else if (cycle === 2 || cycle === 6) { type = 'lower'; label = 'Lower Body'; list = phase.lower; }
+            else if (cycle === 5) { type = 'hiit'; label = 'HIIT Cardio'; list = workoutData.hiit; }
+
+            return { type, label, list, dayNum, phase: Math.min(phaseIdx + 1, 3) };
+        }
+
+        // --- RENDERING ---
+        function renderCalendar() {
+            const grid = document.getElementById('calendar-grid');
+            grid.innerHTML = '';
+
+            const year = today.getFullYear();
+            const month = today.getMonth();
+            
+            // Update Header Text
+            const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+            document.getElementById('current-month-display').innerText = `${monthNames[month]} ${year}`;
+
+            const firstDay = new Date(year, month, 1).getDay();
+            const daysInMonth = new Date(year, month + 1, 0).getDate();
+
+            // Empty slots
+            for(let i=0; i<firstDay; i++) {
+                const el = document.createElement('div');
+                el.className = 'cal-day empty';
+                grid.appendChild(el);
+            }
+
+            // Day slots
+            for(let i=1; i<=daysInMonth; i++) {
+                const dateStr = `${year}-${String(month+1).padStart(2,'0')}-${String(i).padStart(2,'0')}`;
+                const info = getProgramInfo(dateStr);
+                const isLogged = logs[dateStr];
+                const isToday = (i === today.getDate());
+
+                const card = document.createElement('div');
+                let classes = `cal-day`;
+                if(isToday) classes += ' today';
+                if(isLogged) classes += ' completed';
+                if(info.type === 'rest') classes += ' rest';
+                if(info.type === 'pre') classes += ' pre-start';
+                
+                card.className = classes;
+                
+                // Icon Logic
+                let icon = "";
+                if(info.type === 'upper') icon = "💪";
+                if(info.type === 'lower') icon = "🦵";
+                if(info.type === 'hiit') icon = "🔥";
+                if(info.type === 'rest') icon = "🧘";
+                if(info.type === 'pre') icon = "-";
+
+                // Subtext Logic
+                let subtext = info.type === 'pre' ? '' : `${icon} Day ${info.dayNum}`;
+
+                card.innerHTML = `
+                    <div class="day-num">${i}</div>
+                    <div class="day-workout">${subtext}</div>
+                    <div class="day-check">${isLogged ? '✅' : ''}</div>
+                `;
+                
+                if(info.type !== 'pre') {
+                    card.onclick = () => openModal(dateStr);
+                }
+                
+                grid.appendChild(card);
+            }
+        }
+
+        function updateStats() {
+            // Count Completed
+            const count = Object.keys(logs).length;
+            document.getElementById('completed-val').innerText = count;
+
+            // Current Program Day
+            const todayStr = today.toISOString().split('T')[0];
+            const info = getProgramInfo(todayStr);
+            document.getElementById('program-day-val').innerText = info.dayNum > 0 ? info.dayNum : '-';
+
+            // Streak (Backwards from yesterday/today)
+            let streak = 0;
+            let d = new Date();
+            // Check today first, if not done, check yesterday to start streak count
+            if(!logs[d.toISOString().split('T')[0]]) d.setDate(d.getDate() - 1);
+            
+            while(true) {
+                const s = d.toISOString().split('T')[0];
+                if(logs[s]) { streak++; d.setDate(d.getDate() - 1); }
+                else break;
+            }
+            document.getElementById('streak-val').innerText = streak;
+        }
+
+        // --- MODAL FUNCTIONS ---
+        const modal = document.getElementById('workout-modal');
+        const settingsModal = document.getElementById('settings-modal');
+
+        function openModal(dateStr) {
+            currentModalDateStr = dateStr;
+            const info = getProgramInfo(dateStr);
+            const data = logs[dateStr] || {};
+
+            document.getElementById('modal-date-display').innerText = new Date(dateStr).toLocaleDateString('en-US', { month:'short', day:'numeric'});
+            document.getElementById('modal-phase-tag').innerText = `PHASE ${info.phase} • DAY ${info.dayNum}`;
+            document.getElementById('modal-workout-name').innerText = info.label;
+
+            // Habits
+            document.getElementById('habit-water').checked = data.habits?.water || false;
+            document.getElementById('habit-steps').checked = data.habits?.steps || false;
+            document.getElementById('habit-protein').checked = data.habits?.protein || false;
+
+            // Build List
+            const listContainer = document.getElementById('exercise-list');
+            listContainer.innerHTML = '';
+
+            if(info.type === 'rest') {
+                listContainer.innerHTML = `<div style="text-align:center; padding:20px; color:#94a3b8">Active Recovery Day.<br>Focus on stretching, walking, and hydration.</div>`;
+            } else {
+                info.list.forEach(ex => {
+                    const sets = data.exercises?.[ex.name] || [];
+                    const setTarget = parseInt(ex.target.match(/\d+/)[0]) || 3;
+                    
+                    let inputs = '';
+                    for(let i=0; i<setTarget; i++) {
+                        inputs += `<input type="text" placeholder="${i+1}" value="${sets[i] || ''}" data-ex="${ex.name}">`;
+                    }
+
+                    const row = document.createElement('div');
+                    row.className = 'exercise-block';
+                    row.innerHTML = `
+                        <div class="ex-header"><span>${ex.name}</span> <span class="ex-target">${ex.target}</span></div>
+                        <div class="set-inputs">${inputs}</div>
+                    `;
+                    listContainer.appendChild(row);
+                });
+            }
+
+            modal.classList.remove('hidden');
+        }
+
+        document.getElementById('save-log-btn').onclick = () => {
+            const inputs = document.querySelectorAll('.exercise-block input');
+            let exercises = {};
+            let hasData = false;
+
+            inputs.forEach(inp => {
+                const name = inp.dataset.ex;
+                if(!exercises[name]) exercises[name] = [];
+                exercises[name].push(inp.value);
+                if(inp.value) hasData = true;
+            });
+
+            const habits = {
+                water: document.getElementById('habit-water').checked,
+                steps: document.getElementById('habit-steps').checked,
+                protein: document.getElementById('habit-protein').checked
+            };
+
+            if(hasData || habits.water || habits.steps || habits.protein) {
+                logs[currentModalDateStr] = { exercises, habits };
+                confetti({ origin: { y: 0.7 } });
+            } else {
+                delete logs[currentModalDateStr];
+            }
+
+            localStorage.setItem('shred26_logs', JSON.stringify(logs));
+            modal.classList.add('hidden');
+            renderCalendar();
+            updateStats();
+        };
+
+        document.getElementById('close-log-btn').onclick = () => modal.classList.add('hidden');
+
+        // --- SETTINGS ---
+        document.getElementById('settings-btn').onclick = () => settingsModal.classList.remove('hidden');
+        document.getElementById('close-settings-btn').onclick = () => settingsModal.classList.add('hidden');
+        
+        document.getElementById('save-settings-btn').onclick = () => {
+            const val = document.getElementById('start-date-input').value;
+            if(val) {
+                settings.startDate = val;
+                localStorage.setItem('shred26_settings', JSON.stringify(settings));
+                location.reload();
+            }
+        };
+
+        document.getElementById('reset-btn').onclick = () => {
+            if(confirm("Delete all history and reset?")) {
+                localStorage.clear();
+                location.reload();
+            }
+        };
+
+    </script>
 </body>
 </html>
