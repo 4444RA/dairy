@@ -3,60 +3,96 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>January Shred - 30 Day Tracker</title>
+    <title>Shred Challenge Tracker</title>
     <link rel="stylesheet" href="style.css">
-    <!-- Confetti for motivation -->
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
 </head>
 <body>
     <header>
-        <h1>JANUARY SHRED</h1>
-        <p>Calisthenics & HIIT • Beginner Foundation</p>
+        <div class="header-top">
+            <h1>SHRED TRACKER</h1>
+            <button id="settings-btn" class="icon-btn">⚙️ Settings</button>
+        </div>
+        <div id="current-month-display">February 2025</div>
         
-        <div class="progress-section">
-            <div class="progress-label">
-                <span>CHALLENGE PROGRESS</span>
-                <span id="progress-percent">0%</span>
+        <!-- Stats Row -->
+        <div class="stats-row">
+            <div class="stat-box">
+                <span class="stat-val" id="streak-val">0</span>
+                <span class="stat-label">Day Streak</span>
             </div>
-            <div class="progress-bar-bg">
-                <div id="progress-bar"></div>
+            <div class="stat-box">
+                <span class="stat-val" id="completed-val">0</span>
+                <span class="stat-label">Workouts Done</span>
+            </div>
+            <div class="stat-box">
+                <span class="stat-val" id="program-day-val">1</span>
+                <span class="stat-label">Program Day</span>
             </div>
         </div>
     </header>
 
-    <div class="grid" id="grid"></div>
+    <!-- Days of Week Header -->
+    <div class="week-header">
+        <div>Sun</div><div>Mon</div><div>Tue</div><div>Wed</div><div>Thu</div><div>Fri</div><div>Sat</div>
+    </div>
 
-    <!-- Modal for Logging -->
-    <div id="modal-overlay" class="hidden">
-        <div class="modal">
-            <h2 id="modal-title">Day X</h2>
-            <div id="modal-tag" class="phase-tag">Phase 1</div>
-            
-            <div id="exercise-list">
-                <!-- Exercises and Sets injected here -->
-            </div>
+    <!-- The Calendar Grid -->
+    <div class="calendar-grid" id="calendar-grid"></div>
 
-            <div class="modal-habits">
-                <h3>Daily Habits</h3>
-                <div class="habit-grid">
-                    <label><input type="checkbox" id="modal-habit-water"> 💧 3L Water</label>
-                    <label><input type="checkbox" id="modal-habit-steps"> 👟 8k Steps</label>
-                    <label><input type="checkbox" id="modal-habit-protein"> 🥗 140g Protein</label>
-                </div>
-            </div>
-            
+    <!-- Settings Modal -->
+    <div id="settings-modal" class="hidden overlay">
+        <div class="modal settings-box">
+            <h3>Configuration</h3>
+            <label>Program Start Date:</label>
+            <input type="date" id="start-date-input">
+            <p class="small-text">Set this to Today (Feb 17) to make today "Day 1" of the workout plan.</p>
             <div class="modal-buttons">
-                <button id="save-btn">SAVE LOG</button>
-                <button id="close-btn">CANCEL</button>
+                <button id="save-settings-btn">Save & Reload</button>
+                <button id="close-settings-btn">Cancel</button>
+            </div>
+            <hr>
+            <div class="backup-controls">
+                <button id="export-btn">💾 Backup Data</button>
+                <button id="import-btn">📂 Restore Data</button>
+                <input type="file" id="file-input" hidden accept=".json">
             </div>
         </div>
     </div>
 
-    <!-- Backup Controls -->
-    <div class="backup-controls">
-        <button id="export-btn">💾 Export Backup</button>
-        <button id="import-btn">📂 Import Backup</button>
-        <input type="file" id="file-input" style="display: none;" accept=".json">
+    <!-- Workout Logging Modal -->
+    <div id="workout-modal" class="hidden overlay">
+        <div class="modal">
+            <div class="modal-header">
+                <h2 id="modal-date-title">Feb 17</h2>
+                <span id="modal-program-day" class="phase-tag">Day 1 - Phase 1</span>
+            </div>
+            <h3 id="workout-type-title">Upper Body</h3>
+
+            <div id="exercise-list"></div>
+
+            <div class="modal-extras">
+                <div class="habit-section">
+                    <h4>Daily Wins</h4>
+                    <div class="habit-grid">
+                        <label><input type="checkbox" id="habit-water"> 💧 3L Water</label>
+                        <label><input type="checkbox" id="habit-steps"> 👟 8k Steps</label>
+                        <label><input type="checkbox" id="habit-protein"> 🥗 Protein</label>
+                    </div>
+                </div>
+                
+                <div class="tracking-section">
+                    <h4>Session Details</h4>
+                    <label>Energy Level (1-10): <input type="number" id="energy-rating" min="1" max="10" value="7"></label>
+                    <textarea id="workout-notes" placeholder="How did it feel? Added weight? Soreness?"></textarea>
+                </div>
+            </div>
+            
+            <div class="modal-buttons">
+                <button id="save-log-btn">COMPLETE SESSION</button>
+                <button id="close-log-btn">CLOSE</button>
+            </div>
+        </div>
     </div>
 
     <script src="app.js"></script>
