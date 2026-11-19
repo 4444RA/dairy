@@ -2,470 +2,964 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Shred Tracker 2026</title>
-    <!-- Confetti Library -->
-    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
-    
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="theme-color" content="#f5f4ef">
+    <title>Daily Food Tracker</title>
     <style>
         :root {
-            --bg: #0f172a;
-            --card: #1e293b;
-            --card-hover: #334155;
-            --primary: #10b981;  /* Green */
-            --accent: #38bdf8;   /* Blue */
-            --today: #f59e0b;    /* Orange */
-            --text: #f8fafc;
-            --text-dim: #94a3b8;
+            --bg-color: #f5f4ef;
+            --card-bg: #ffffff;
+            --card-border: #dcd9d0;
+            --soft-bg: #f0eee7;
+            --text-main: #1a1a1a;
+            --text-muted: #52524e;
+            --accent: #1b6b46;
+            --accent-hover: #145336;
+            --accent-light: #e7f4ed;
+            --danger: #b42318;
+            --danger-bg: #fef3f2;
+            --danger-border: #fecdca;
+        }
+
+        * {
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
         }
 
         body {
-            font-family: 'Inter', system-ui, -apple-system, sans-serif;
-            background: var(--bg); color: var(--text);
-            margin: 0; padding: 20px;
-            display: flex; flex-direction: column; align-items: center;
+            margin: 0;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            font-size: 18px;
+            line-height: 1.45;
+            display: flex;
+            justify-content: center;
             min-height: 100vh;
         }
 
-        /* HEADER */
-        header { width: 100%; max-width: 600px; margin-bottom: 20px; }
-        .header-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
-        h1 { font-size: 1.8rem; color: var(--primary); margin: 0; letter-spacing: -1px; text-transform: uppercase;}
-        .icon-btn { background: none; border: 1px solid var(--card-hover); color: var(--text-dim); padding: 6px 12px; border-radius: 6px; cursor: pointer; font-size: 0.8rem; transition: 0.2s;}
-        .icon-btn:hover { color: var(--text); border-color: var(--accent); }
-
-        #current-month-display { font-size: 1.2rem; font-weight: 700; color: var(--text); margin-bottom: 15px; }
-
-        /* STATS */
-        .stats-row { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-bottom: 25px; }
-        .stat-box { background: var(--card); padding: 15px 10px; border-radius: 12px; text-align: center; border: 1px solid var(--card-hover); }
-        .stat-val { display: block; font-size: 1.4rem; font-weight: 800; color: var(--accent); margin-bottom: 4px; }
-        .stat-label { font-size: 0.65rem; color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.5px; }
-
-        /* CALENDAR */
-        .week-header { 
-            display: grid; grid-template-columns: repeat(7, 1fr); 
-            width: 100%; max-width: 600px; text-align: center; 
-            font-size: 0.75rem; color: var(--text-dim); margin-bottom: 8px; font-weight: 600;
-        }
-        .calendar-grid {
-            display: grid; grid-template-columns: repeat(7, 1fr);
-            gap: 6px; width: 100%; max-width: 600px;
+        .app-container {
+            width: 100%;
+            max-width: 580px;
+            padding: 18px 16px 60px 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 18px;
         }
 
-        .cal-day {
-            background: var(--card); aspect-ratio: 0.9/1; 
-            border-radius: 8px; padding: 4px; position: relative;
-            border: 1px solid transparent; cursor: pointer; transition: 0.2s;
-            display: flex; flex-direction: column; justify-content: space-between;
+        /* Header */
+        .app-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 10px;
         }
-        .cal-day:hover { transform: translateY(-2px); border-color: var(--card-hover); }
-        .cal-day.empty { background: transparent; cursor: default; border: none; }
-        
-        /* Status Colors */
-        .cal-day.today { border: 1px solid var(--today); box-shadow: 0 0 8px rgba(245, 158, 11, 0.2); }
-        .cal-day.completed { background: rgba(16, 185, 129, 0.15); border: 1px solid var(--primary); }
-        .cal-day.rest { opacity: 0.4; }
-        .cal-day.pre-start { opacity: 0.2; pointer-events: none; } /* Grays out days before start date */
-
-        .day-num { font-size: 0.75rem; font-weight: bold; padding-left: 2px; }
-        .day-workout { font-size: 0.65rem; color: var(--accent); font-weight: 700; line-height: 1.1; text-align: center;}
-        .day-check { font-size: 0.9rem; text-align: right; min-height: 1rem; }
-
-        /* MODAL */
-        .hidden { display: none !important; }
-        .overlay {
-            position: fixed; inset: 0; background: rgba(0,0,0,0.85);
-            display: flex; align-items: center; justify-content: center; z-index: 100; backdrop-filter: blur(4px);
+        .app-title {
+            font-size: 1.55rem;
+            font-weight: 800;
+            margin: 0;
+            letter-spacing: -0.02em;
         }
-        .modal {
-            background: #1e293b; width: 90%; max-width: 450px;
-            padding: 25px; border-radius: 16px; border: 1px solid #475569;
-            max-height: 85vh; overflow-y: auto; box-shadow: 0 10px 25px rgba(0,0,0,0.5);
-        }
-        
-        .modal-header { margin-bottom: 20px; border-bottom: 1px solid var(--card-hover); padding-bottom: 15px; }
-        .modal-title-row { display: flex; justify-content: space-between; align-items: center; }
-        .modal-date { font-size: 1.2rem; font-weight: bold; color: var(--text); }
-        .phase-tag { background: var(--accent); color: #000; padding: 3px 10px; border-radius: 12px; font-size: 0.7rem; font-weight: 800; }
-        .workout-name { color: var(--primary); margin: 5px 0 0 0; font-size: 1rem; }
-
-        /* Exercises */
-        .exercise-list { margin-bottom: 20px; }
-        .exercise-block { background: #0f172a; padding: 10px; border-radius: 8px; margin-bottom: 10px; border: 1px solid var(--card-hover); }
-        .ex-header { display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 0.9rem; font-weight: 600; }
-        .ex-target { color: var(--accent); font-size: 0.8rem; }
-        
-        .set-inputs { display: flex; gap: 8px; }
-        .set-inputs input { 
-            flex: 1; background: #1e293b; border: 1px solid #475569; 
-            color: white; padding: 8px; border-radius: 6px; text-align: center; font-weight: bold;
+        .sync-pill {
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: var(--accent);
+            background: var(--accent-light);
+            padding: 6px 12px;
+            border-radius: 999px;
         }
 
-        /* Habits & Buttons */
-        .habit-section { margin-top: 15px; background: #0f172a; padding: 15px; border-radius: 8px; }
-        .habit-row { display: flex; justify-content: space-between; gap: 10px; }
-        .habit-label { 
-            background: #1e293b; flex: 1; padding: 10px; border-radius: 6px; 
-            font-size: 0.75rem; cursor: pointer; display: flex; align-items: center; gap: 5px; border: 1px solid #334155; 
+        /* Date Bar */
+        .date-bar {
+            background: var(--card-bg);
+            border: 2px solid var(--card-border);
+            border-radius: 14px;
+            padding: 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
         }
-        .habit-label input { accent-color: var(--primary); }
+        .date-controls {
+            display: grid;
+            grid-template-columns: auto 1fr auto;
+            gap: 8px;
+            align-items: center;
+        }
+        .date-display {
+            text-align: center;
+            font-size: 1.15rem;
+            font-weight: 700;
+        }
+        .date-picker-row {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+        .date-input {
+            flex: 1;
+            font-size: 1rem;
+            font-family: inherit;
+            padding: 10px 12px;
+            border: 2px solid var(--card-border);
+            border-radius: 10px;
+            background: var(--soft-bg);
+            color: var(--text-main);
+            min-height: 46px;
+        }
 
-        .modal-buttons { display: flex; gap: 10px; margin-top: 20px; }
-        button { font-family: inherit; font-size: 0.9rem; transition: 0.2s; }
-        button:active { transform: scale(0.98); }
-        .btn-primary { flex: 2; background: var(--primary); color: #0f172a; padding: 14px; border: none; border-radius: 8px; font-weight: 800; cursor: pointer; }
-        .btn-secondary { flex: 1; background: #334155; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; }
+        /* Cards */
+        .card {
+            background: var(--card-bg);
+            border: 2px solid var(--card-border);
+            border-radius: 16px;
+            padding: 18px;
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.03);
+        }
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        .card-title {
+            font-size: 1.25rem;
+            font-weight: 800;
+            margin: 0;
+        }
 
-        /* Settings Modal Specifics */
-        .settings-group { margin-bottom: 20px; }
-        .settings-group label { display: block; color: var(--text-dim); font-size: 0.8rem; margin-bottom: 5px; }
-        .settings-group input { 
-            width: 100%; padding: 10px; background: #0f172a; border: 1px solid var(--card-hover); 
-            color: white; border-radius: 8px; font-family: inherit; box-sizing: border-box;
+        /* Buttons */
+        .btn {
+            font-family: inherit;
+            font-size: 1rem;
+            font-weight: 700;
+            padding: 12px 16px;
+            min-height: 48px;
+            border-radius: 10px;
+            border: 2px solid var(--card-border);
+            background: var(--soft-bg);
+            color: var(--text-main);
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            transition: background-color 0.15s, transform 0.05s;
+        }
+        .btn:active {
+            transform: scale(0.98);
+        }
+        .btn-primary {
+            background: var(--accent);
+            border-color: var(--accent);
+            color: #ffffff;
+        }
+        .btn-primary:hover {
+            background: var(--accent-hover);
+        }
+        .btn-primary.added {
+            background: #0f4c81;
+            border-color: #0f4c81;
+        }
+        .btn-danger {
+            background: var(--danger-bg);
+            border-color: var(--danger-border);
+            color: var(--danger);
+            padding: 10px 14px;
+        }
+        .btn-small {
+            min-height: 44px;
+            padding: 8px 14px;
+            font-size: 0.95rem;
+        }
+
+        /* Calorie Summary */
+        .calorie-hero {
+            display: flex;
+            align-items: baseline;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        .calorie-big {
+            font-size: 2.75rem;
+            font-weight: 800;
+            line-height: 1;
+            color: var(--text-main);
+        }
+        .calorie-goal-text {
+            font-size: 1.15rem;
+            color: var(--text-muted);
+            font-weight: 600;
+        }
+        .status-banner {
+            font-size: 1.05rem;
+            font-weight: 700;
+            padding: 10px 14px;
+            border-radius: 10px;
+            background: var(--soft-bg);
+            color: var(--text-main);
+        }
+        .status-banner.goal-met {
+            background: var(--accent-light);
+            color: var(--accent);
+        }
+        .progress-track {
+            width: 100%;
+            height: 16px;
+            background: #e4e1d8;
+            border-radius: 999px;
+            overflow: hidden;
+        }
+        .progress-fill {
+            height: 100%;
+            background: var(--accent);
+            width: 0%;
+            border-radius: 999px;
+            transition: width 0.25s ease;
+        }
+
+        /* Macros Grid */
+        .macro-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+        }
+        .macro-box {
+            background: var(--soft-bg);
+            border-radius: 12px;
+            padding: 12px 8px;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+        .macro-label {
+            font-size: 0.9rem;
+            font-weight: 700;
+            color: var(--text-muted);
+        }
+        .macro-value {
+            font-size: 1.35rem;
+            font-weight: 800;
+            color: var(--text-main);
+        }
+        .macro-sub {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+
+        /* Inputs & Forms */
+        .field-group {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+        .field-label {
+            font-size: 0.95rem;
+            font-weight: 700;
+            color: var(--text-main);
+        }
+        .text-input {
+            width: 100%;
+            font-family: inherit;
+            font-size: 1.05rem;
+            padding: 12px 14px;
+            min-height: 48px;
+            border: 2px solid var(--card-border);
+            border-radius: 10px;
+            background: #ffffff;
+            color: var(--text-main);
+        }
+        .text-input:focus {
+            outline: none;
+            border-color: var(--accent);
+        }
+        .form-panel {
+            background: var(--soft-bg);
+            border: 2px solid var(--card-border);
+            border-radius: 12px;
+            padding: 14px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        .two-col {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+
+        /* Food Rows */
+        .food-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .food-row {
+            background: var(--soft-bg);
+            border: 2px solid #e4e1d8;
+            border-radius: 12px;
+            padding: 12px 14px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 12px;
+        }
+        .food-info {
+            display: flex;
+            flex-direction: column;
+            gap: 3px;
+            min-width: 0;
+        }
+        .food-name {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--text-main);
+        }
+        .food-details {
+            font-size: 0.95rem;
+            color: var(--text-muted);
+        }
+        .empty-note {
+            font-size: 1rem;
+            color: var(--text-muted);
+            padding: 8px 0;
+        }
+
+        /* Search Bar */
+        .search-row {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+
+        /* Past Days */
+        .history-row {
+            background: var(--soft-bg);
+            border: 2px solid #e4e1d8;
+            border-radius: 12px;
+            padding: 14px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 10px;
+            cursor: pointer;
+            text-align: left;
+            width: 100%;
+            font-family: inherit;
+        }
+        .history-row:hover {
+            border-color: var(--accent);
+        }
+
+        /* Toast Confirmation */
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #1a1a1a;
+            color: #ffffff;
+            font-size: 1rem;
+            font-weight: 700;
+            padding: 12px 22px;
+            border-radius: 999px;
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25);
+            z-index: 200;
+            display: none;
+        }
+
+        @media (max-width: 420px) {
+            .macro-grid {
+                grid-template-columns: 1fr;
+            }
+            .food-row {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            .food-row .btn {
+                width: 100%;
+            }
         }
     </style>
 </head>
 <body>
 
-    <header>
-        <div class="header-top">
-            <h1>🔥 SHRED 2026</h1>
-            <button id="settings-btn" class="icon-btn">⚙️ Settings</button>
-        </div>
-        
-        <div class="stats-row">
-            <div class="stat-box">
-                <span class="stat-val" id="streak-val">0</span>
-                <span class="stat-label">Day Streak</span>
-            </div>
-            <div class="stat-box">
-                <span class="stat-val" id="completed-val">0</span>
-                <span class="stat-label">Workouts Done</span>
-            </div>
-            <div class="stat-box">
-                <span class="stat-val" id="program-day-val">1</span>
-                <span class="stat-label">Program Day</span>
-            </div>
-        </div>
-
-        <div id="current-month-display">Loading...</div>
-
-        <!-- Days of Week -->
-        <div class="week-header">
-            <div>SUN</div><div>MON</div><div>TUE</div><div>WED</div><div>THU</div><div>FRI</div><div>SAT</div>
-        </div>
-
-        <!-- The Calendar -->
-        <div class="calendar-grid" id="calendar-grid"></div>
+<div class="app-container">
+    <header class="app-header">
+        <h1 class="app-title">Daily Food Tracker</h1>
+        <span id="sync-status" class="sync-pill">Saved ✓</span>
     </header>
 
-    <!-- Workout Modal -->
-    <div id="workout-modal" class="hidden overlay">
-        <div class="modal">
-            <div class="modal-header">
-                <div class="modal-title-row">
-                    <div class="modal-date" id="modal-date-display">Feb 17</div>
-                    <div class="phase-tag" id="modal-phase-tag">Day 1</div>
-                </div>
-                <h3 class="workout-name" id="modal-workout-name">Upper Body</h3>
-            </div>
-
-            <div id="exercise-list" class="exercise-list"></div>
-
-            <div class="habit-section">
-                <div style="font-size:0.8rem; color:gray; margin-bottom:8px">DAILY WINS</div>
-                <div class="habit-row">
-                    <label class="habit-label"><input type="checkbox" id="habit-water"> 💧 3L Water</label>
-                    <label class="habit-label"><input type="checkbox" id="habit-steps"> 👟 8k Steps</label>
-                    <label class="habit-label"><input type="checkbox" id="habit-protein"> 🥗 Protein</label>
-                </div>
-            </div>
-            
-            <div class="modal-buttons">
-                <button class="btn-primary" id="save-log-btn">COMPLETE SESSION</button>
-                <button class="btn-secondary" id="close-log-btn">CANCEL</button>
-            </div>
+    <!-- Date Selector -->
+    <div class="date-bar">
+        <div class="date-controls">
+            <button class="btn btn-small" onclick="shiftDate(-1)">◀ Prev</button>
+            <div id="friendly-date" class="date-display">Today</div>
+            <button class="btn btn-small" onclick="shiftDate(1)">Next ▶</button>
+        </div>
+        <div class="date-picker-row">
+            <input type="date" id="diet-date-input" class="date-input" onchange="changeDietDate(this.value)">
+            <button id="today-btn" class="btn btn-small" onclick="goToToday()">Today</button>
         </div>
     </div>
 
-    <!-- Settings Modal -->
-    <div id="settings-modal" class="hidden overlay">
-        <div class="modal">
-            <h2>⚙️ Configuration</h2>
-            <div class="settings-group">
-                <label>Program Start Date</label>
-                <input type="date" id="start-date-input">
-                <p style="font-size:0.75rem; color:#64748b; margin-top:5px">
-                    Set this to <strong>Today</strong> (Feb 17) to make today "Day 1".
-                </p>
-            </div>
-            <div class="modal-buttons">
-                <button class="btn-primary" id="save-settings-btn">SAVE & REFRESH</button>
-                <button class="btn-secondary" id="close-settings-btn">CANCEL</button>
-            </div>
-            <hr style="border:0; border-top:1px solid #334155; margin:20px 0;">
-            <div class="settings-group">
-                <label>Data Management</label>
-                <button class="icon-btn" id="reset-btn" style="width:100%; border-color: #ef4444; color:#ef4444;">⚠️ Reset All Data</button>
+    <!-- Daily Summary Card -->
+    <section class="card" id="summary-section"></section>
+
+    <!-- What I Ate Today Card -->
+    <section class="card" id="logged-section"></section>
+
+    <!-- Quick Add Foods Card -->
+    <section class="card">
+        <div class="card-header">
+            <h2 class="card-title">Add Food</h2>
+            <button id="toggle-custom-btn" class="btn btn-small" onclick="toggleCustomFoodForm()">+ My Own Food</button>
+        </div>
+
+        <div id="custom-food-container"></div>
+
+        <div class="field-group">
+            <label for="food-search" class="field-label">Find a food</label>
+            <div class="search-row">
+                <input
+                    type="text"
+                    id="food-search"
+                    class="text-input"
+                    placeholder="Type e.g. eggs, chicken, banana..."
+                    oninput="handleSearchInput(this.value)"
+                >
+                <button id="clear-search-btn" class="btn btn-small" style="display:none;" onclick="clearSearch()">Clear</button>
             </div>
         </div>
-    </div>
 
-    <script>
-        // --- DATA STRUCTURES ---
-        const workoutData = {
-            phases: [
-                { // Phase 1: Foundation
-                    upper: [{name:"Push-ups", target:"3 x Max"}, {name:"Pole Rows", target:"3 x 10"}, {name:"Chair Dips", target:"3 x 12"}, {name:"Mtn Climbers", target:"3 x 45s"}],
-                    lower: [{name:"Air Squats", target:"3 x 20"}, {name:"Rev Lunges", target:"3 x 12"}, {name:"Glute Bridge", target:"3 x 20"}, {name:"Plank", target:"3 x 45s"}]
-                },
-                { // Phase 2: Grind
-                    upper: [{name:"Diamond Push", target:"3 x 10"}, {name:"Wide Rows", target:"3 x 12"}, {name:"Pike Pushups", target:"3 x 8"}, {name:"Burpees", target:"3 x 10"}],
-                    lower: [{name:"Bulgarian Sqt", target:"3 x 10"}, {name:"Wall Sit", target:"3 x 60s"}, {name:"Calf Raises", target:"3 x 25"}, {name:"Jump Squats", target:"3 x 15"}]
-                },
-                { // Phase 3: Shred
-                    upper: [{name:"Decline Push", target:"4 x 12"}, {name:"Close Rows", target:"3 x 8"}, {name:"Plank-Pushup", target:"3 x 12"}, {name:"Burpee+Push", target:"3 x 10"}],
-                    lower: [{name:"Pistol Squat", target:"3 x 5"}, {name:"Cossack Sqt", target:"3 x 12"}, {name:"1-Leg Bridge", target:"3 x 15"}, {name:"Broad Jumps", target:"3 x 10"}]
-                }
-            ],
-            hiit: [ {name:"Burpees", target:"45s"}, {name:"High Knees", target:"45s"}, {name:"Mtn Climbers", target:"45s"}, {name:"Rest", target:"60s"} ]
-        };
+        <div id="quick-food-list" class="food-list"></div>
+    </section>
 
-        // --- STATE & INIT ---
-        const today = new Date(); // Uses System Time (2026)
-        let logs = JSON.parse(localStorage.getItem('shred26_logs')) || {};
-        let settings = JSON.parse(localStorage.getItem('shred26_settings')) || { 
-            // Default start date to today so "Day 1" is today
-            startDate: today.toISOString().split('T')[0] 
-        };
-        let currentModalDateStr = null;
+    <!-- Recent Days Card -->
+    <section class="card" id="recent-days-section"></section>
+</div>
 
-        // Initialize when DOM is ready
-        document.addEventListener('DOMContentLoaded', () => {
-            // Set input to current setting
-            document.getElementById('start-date-input').value = settings.startDate;
-            
-            renderCalendar();
-            updateStats();
+<div id="toast" class="toast"></div>
+
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+
+<script>
+    const firebaseConfig = {
+        apiKey: "AIzaSyCQ4vHqGiv_yRkA0zZaaOU24gxhqBkxnv4",
+        authDomain: "journal-a003f.firebaseapp.com",
+        databaseURL: "https://journal-a003f-default-rtdb.asia-southeast1.firebasedatabase.app",
+        projectId: "journal-a003f",
+        storageBucket: "journal-a003f.firebasestorage.app",
+        messagingSenderId: "1038636626553",
+        appId: "1:1038636626553:web:7a91c321e39c146bdc9aa8"
+    };
+
+    // Separate Firebase path so these logs don't mix with your workout tracker
+    let dietDbRef = null;
+    let dietTargetDbRef = null;
+    try {
+        firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
+        dietDbRef = database.ref('simple_diet_tracker/diet_logs');
+        dietTargetDbRef = database.ref('simple_diet_tracker/diet_target');
+    } catch (e) {
+        console.warn("Running in local-only mode:", e);
+    }
+
+    const DIET_FOODS = [
+        { id: "eggs_2", name: "Eggs (2 large)", calories: 144, protein: 13, carbs: 1, fat: 10 },
+        { id: "ice_cream", name: "Ice cream (100g)", calories: 207, protein: 4, carbs: 24, fat: 11 },
+        { id: "lasagne", name: "Lasagne (1 serving)", calories: 750, protein: 45, carbs: 50, fat: 35 },
+        { id: "stroganoff", name: "Stroganoff (1 meal)", calories: 650, protein: 35, carbs: 65, fat: 25 },
+        { id: "tuna_tin", name: "Tuna tin (95g drained)", calories: 110, protein: 24, carbs: 0, fat: 1 },
+        { id: "bread_2", name: "Bread (2 slices)", calories: 200, protein: 8, carbs: 36, fat: 3 },
+        { id: "potato_300", name: "Potato (300g)", calories: 261, protein: 6, carbs: 60, fat: 0 },
+        { id: "banana_1", name: "Banana (1 medium)", calories: 105, protein: 1, carbs: 27, fat: 0 },
+        { id: "oats_80", name: "Oats (1 cup / 80g)", calories: 303, protein: 11, carbs: 54, fat: 6 },
+        { id: "peanut_butter", name: "Peanut butter (1 tbsp)", calories: 95, protein: 4, carbs: 4, fat: 8 },
+        { id: "milo_bar", name: "Milo bar (1 bar)", calories: 160, protein: 3, carbs: 24, fat: 6 },
+        { id: "salmon_100", name: "Salmon (100g)", calories: 206, protein: 22, carbs: 0, fat: 13 },
+        { id: "pizza_serving", name: "Pizza (1 serving)", calories: 975, protein: 38, carbs: 154, fat: 23 },
+        { id: "milk_100ml", name: "Milk (100ml full cream)", calories: 64, protein: 3, carbs: 5, fat: 4 },
+        { id: "chicken_150", name: "Chicken breast (150g cooked)", calories: 248, protein: 46, carbs: 0, fat: 5 },
+        { id: "sweet_potato_300", name: "Sweet potato (300g)", calories: 270, protein: 5, carbs: 63, fat: 0 }
+    ];
+
+    function getLocalDateStr(offsetDays = 0) {
+        const d = new Date();
+        d.setDate(d.getDate() + offsetDays);
+        return new Date(d.getTime() - d.getTimezoneOffset() * 60000).toISOString().split('T')[0];
+    }
+
+    function formatFriendlyDate(dateStr) {
+        const today = getLocalDateStr(0);
+        const yesterday = getLocalDateStr(-1);
+        const tomorrow = getLocalDateStr(1);
+
+        const d = new Date(dateStr + "T12:00:00");
+        const formatted = d.toLocaleDateString(undefined, {
+            weekday: 'short',
+            day: 'numeric',
+            month: 'short'
         });
 
-        // --- CORE LOGIC ---
-        function getProgramInfo(dateStr) {
-            const start = new Date(settings.startDate);
-            const current = new Date(dateStr);
-            
-            // Calculate difference in days
-            const diffTime = current - start;
-            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)); 
-            
-            // Before Start Date
-            if (diffDays < 0) return { type: 'pre', label: 'Waiting', dayNum: 0 };
+        if (dateStr === today) return `Today (${formatted})`;
+        if (dateStr === yesterday) return `Yesterday (${formatted})`;
+        if (dateStr === tomorrow) return `Tomorrow (${formatted})`;
+        return formatted;
+    }
 
-            const dayNum = diffDays + 1; // Day 1, Day 2...
-            
-            // Weekly Cycle: 1=Upper, 2=Lower, 3=Rest, 4=Upper, 5=HIIT, 6=Lower, 0=Rest
-            // We use (dayNum % 7) to find position in week
-            const cycle = dayNum % 7; 
-            
-            let type = 'rest', label = 'Recovery / Yoga', list = [];
-            const phaseIdx = Math.floor((dayNum - 1) / 10); // 0, 1, or 2
-            const phase = workoutData.phases[Math.min(phaseIdx, 2)];
+    function escapeHtml(str) {
+        return String(str || '')
+            .replace(/&/g, "&amp;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;")
+            .replace(/"/g, "&quot;")
+            .replace(/'/g, "&#039;");
+    }
 
-            if (cycle === 1 || cycle === 4) { type = 'upper'; label = 'Upper Body'; list = phase.upper; }
-            else if (cycle === 2 || cycle === 6) { type = 'lower'; label = 'Lower Body'; list = phase.lower; }
-            else if (cycle === 5) { type = 'hiit'; label = 'HIIT Cardio'; list = workoutData.hiit; }
+    let dietLogs = JSON.parse(localStorage.getItem('simple_diet_log_cache')) || {};
+    let dietTarget = JSON.parse(localStorage.getItem('simple_diet_target_cache')) || { calories: 2000, protein: 100 };
+    let selectedDate = getLocalDateStr(0);
+    let searchQuery = "";
+    let showGoalEditor = false;
+    let showCustomForm = false;
+    let toastTimer = null;
 
-            return { type, label, list, dayNum, phase: Math.min(phaseIdx + 1, 3) };
+    if (dietDbRef) {
+        dietDbRef.on('value', snapshot => {
+            dietLogs = snapshot.val() || {};
+            localStorage.setItem('simple_diet_log_cache', JSON.stringify(dietLogs));
+            renderAll();
+            setSyncText("Saved ✓");
+        });
+    }
+
+    if (dietTargetDbRef) {
+        dietTargetDbRef.on('value', snapshot => {
+            const val = snapshot.val();
+            if (val && val.calories) {
+                dietTarget = val;
+                localStorage.setItem('simple_diet_target_cache', JSON.stringify(dietTarget));
+                renderSummary();
+                renderRecentDays();
+            }
+        });
+    }
+
+    function setSyncText(text) {
+        const el = document.getElementById('sync-status');
+        if (el) el.textContent = text;
+    }
+
+    function showToast(message) {
+        const toast = document.getElementById('toast');
+        toast.textContent = message;
+        toast.style.display = 'block';
+        clearTimeout(toastTimer);
+        toastTimer = setTimeout(() => {
+            toast.style.display = 'none';
+        }, 2200);
+    }
+
+    function getEntriesForDate(dateStr) {
+        const dayObj = dietLogs[dateStr];
+        if (!dayObj || !dayObj.entries) return [];
+        return Object.values(dayObj.entries).sort((a, b) => (a.timestamp || 0) - (b.timestamp || 0));
+    }
+
+    function calculateTotals(entries) {
+        return entries.reduce((acc, item) => {
+            acc.calories += parseFloat(item.calories) || 0;
+            acc.protein += parseFloat(item.protein) || 0;
+            acc.carbs += parseFloat(item.carbs) || 0;
+            acc.fat += parseFloat(item.fat) || 0;
+            return acc;
+        }, { calories: 0, protein: 0, carbs: 0, fat: 0 });
+    }
+
+    function renderDateBar() {
+        document.getElementById('friendly-date').textContent = formatFriendlyDate(selectedDate);
+        document.getElementById('diet-date-input').value = selectedDate;
+        const todayBtn = document.getElementById('today-btn');
+        const isToday = selectedDate === getLocalDateStr(0);
+        todayBtn.style.opacity = isToday ? "0.5" : "1";
+    }
+
+    function renderSummary() {
+        const entries = getEntriesForDate(selectedDate);
+        const totals = calculateTotals(entries);
+        const cal = Math.round(totals.calories);
+        const pro = Math.round(totals.protein);
+        const carb = Math.round(totals.carbs);
+        const fat = Math.round(totals.fat);
+
+        const targetCal = parseInt(dietTarget.calories) || 2000;
+        const targetPro = parseInt(dietTarget.protein) || 0;
+        const pct = Math.min(100, Math.round((cal / targetCal) * 100));
+        const diff = targetCal - cal;
+
+        const isGoalMet = cal >= targetCal;
+        const statusMsg = diff > 0
+            ? `${diff} calories remaining for today`
+            : diff === 0
+                ? "Daily calorie goal reached!"
+                : `Daily goal reached (+${Math.abs(diff)} calories over)`;
+
+        document.getElementById('summary-section').innerHTML = `
+            <div class="card-header">
+                <h2 class="card-title">Daily Calories</h2>
+                <button class="btn btn-small" onclick="toggleGoalEditor()">
+                    ${showGoalEditor ? 'Close' : 'Change Goal'}
+                </button>
+            </div>
+
+            <div class="calorie-hero">
+                <span class="calorie-big">${cal}</span>
+                <span class="calorie-goal-text">of ${targetCal} calories</span>
+            </div>
+
+            <div class="progress-track">
+                <div class="progress-fill" style="width: ${pct}%;"></div>
+            </div>
+
+            <div class="status-banner ${isGoalMet ? 'goal-met' : ''}">
+                ${statusMsg}
+            </div>
+
+            ${showGoalEditor ? `
+                <div class="form-panel">
+                    <div class="two-col">
+                        <div class="field-group">
+                            <label class="field-label" for="goal-cal-input">Daily Calorie Goal</label>
+                            <input type="number" id="goal-cal-input" class="text-input" value="${targetCal}">
+                        </div>
+                        <div class="field-group">
+                            <label class="field-label" for="goal-pro-input">Protein Goal (g)</label>
+                            <input type="number" id="goal-pro-input" class="text-input" value="${targetPro}">
+                        </div>
+                    </div>
+                    <button class="btn btn-primary" onclick="saveGoals()">Save Goal</button>
+                </div>
+            ` : ''}
+
+            <div class="macro-grid">
+                <div class="macro-box">
+                    <span class="macro-label">Protein</span>
+                    <span class="macro-value">${pro}g</span>
+                    <span class="macro-sub">${targetPro > 0 ? `Goal: ${targetPro}g` : 'eaten'}</span>
+                </div>
+                <div class="macro-box">
+                    <span class="macro-label">Carbs</span>
+                    <span class="macro-value">${carb}g</span>
+                    <span class="macro-sub">eaten</span>
+                </div>
+                <div class="macro-box">
+                    <span class="macro-label">Fat</span>
+                    <span class="macro-value">${fat}g</span>
+                    <span class="macro-sub">eaten</span>
+                </div>
+            </div>
+        `;
+    }
+
+    function renderLoggedFoods() {
+        const entries = getEntriesForDate(selectedDate);
+        let listHtml = "";
+
+        if (entries.length === 0) {
+            listHtml = `<div class="empty-note">Nothing logged yet for this day. Tap "+ Add" on a food below.</div>`;
+        } else {
+            listHtml = entries.map(item => `
+                <div class="food-row">
+                    <div class="food-info">
+                        <span class="food-name">${escapeHtml(item.name)}</span>
+                        <span class="food-details">
+                            ${Math.round(item.calories)} calories · ${Math.round(item.protein)}g protein
+                        </span>
+                    </div>
+                    <button class="btn btn-danger" onclick="removeEntry('${selectedDate}', '${item.id}')">Remove</button>
+                </div>
+            `).join('');
         }
 
-        // --- RENDERING ---
-        function renderCalendar() {
-            const grid = document.getElementById('calendar-grid');
-            grid.innerHTML = '';
+        document.getElementById('logged-section').innerHTML = `
+            <div class="card-header">
+                <h2 class="card-title">What I Ate</h2>
+                <span style="font-size: 0.95rem; font-weight: 700; color: var(--text-muted);">
+                    ${entries.length} ${entries.length === 1 ? 'item' : 'items'}
+                </span>
+            </div>
+            <div class="food-list">${listHtml}</div>
+        `;
+    }
 
-            const year = today.getFullYear();
-            const month = today.getMonth();
-            
-            // Update Header Text
-            const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
-            document.getElementById('current-month-display').innerText = `${monthNames[month]} ${year}`;
+    function renderCustomForm() {
+        const btn = document.getElementById('toggle-custom-btn');
+        btn.textContent = showCustomForm ? 'Close' : '+ My Own Food';
 
-            const firstDay = new Date(year, month, 1).getDay();
-            const daysInMonth = new Date(year, month + 1, 0).getDate();
+        const container = document.getElementById('custom-food-container');
+        if (!showCustomForm) {
+            container.innerHTML = "";
+            return;
+        }
 
-            // Empty slots
-            for(let i=0; i<firstDay; i++) {
-                const el = document.createElement('div');
-                el.className = 'cal-day empty';
-                grid.appendChild(el);
-            }
+        container.innerHTML = `
+            <div class="form-panel">
+                <div class="field-group">
+                    <label class="field-label" for="custom-name">Food Name</label>
+                    <input type="text" id="custom-name" class="text-input" placeholder="e.g. Cup of tea with milk">
+                </div>
+                <div class="two-col">
+                    <div class="field-group">
+                        <label class="field-label" for="custom-cal">Calories</label>
+                        <input type="number" id="custom-cal" class="text-input" placeholder="e.g. 150">
+                    </div>
+                    <div class="field-group">
+                        <label class="field-label" for="custom-pro">Protein (g)</label>
+                        <input type="number" id="custom-pro" class="text-input" placeholder="Optional">
+                    </div>
+                </div>
+                <div class="two-col">
+                    <div class="field-group">
+                        <label class="field-label" for="custom-carb">Carbs (g)</label>
+                        <input type="number" id="custom-carb" class="text-input" placeholder="Optional">
+                    </div>
+                    <div class="field-group">
+                        <label class="field-label" for="custom-fat">Fat (g)</label>
+                        <input type="number" id="custom-fat" class="text-input" placeholder="Optional">
+                    </div>
+                </div>
+                <button class="btn btn-primary" onclick="addCustomFood()">Add This Food to Today</button>
+            </div>
+        `;
+    }
 
-            // Day slots
-            for(let i=1; i<=daysInMonth; i++) {
-                const dateStr = `${year}-${String(month+1).padStart(2,'0')}-${String(i).padStart(2,'0')}`;
-                const info = getProgramInfo(dateStr);
-                const isLogged = logs[dateStr];
-                const isToday = (i === today.getDate());
+    function renderQuickFoodList() {
+        const q = searchQuery.trim().toLowerCase();
+        const filtered = DIET_FOODS.filter(f => !q || f.name.toLowerCase().includes(q));
+        const listEl = document.getElementById('quick-food-list');
 
-                const card = document.createElement('div');
-                let classes = `cal-day`;
-                if(isToday) classes += ' today';
-                if(isLogged) classes += ' completed';
-                if(info.type === 'rest') classes += ' rest';
-                if(info.type === 'pre') classes += ' pre-start';
-                
-                card.className = classes;
-                
-                // Icon Logic
-                let icon = "";
-                if(info.type === 'upper') icon = "💪";
-                if(info.type === 'lower') icon = "🦵";
-                if(info.type === 'hiit') icon = "🔥";
-                if(info.type === 'rest') icon = "🧘";
-                if(info.type === 'pre') icon = "-";
+        document.getElementById('clear-search-btn').style.display = q ? 'inline-flex' : 'none';
 
-                // Subtext Logic
-                let subtext = info.type === 'pre' ? '' : `${icon} Day ${info.dayNum}`;
+        if (filtered.length === 0) {
+            listEl.innerHTML = `<div class="empty-note">No foods matched "${escapeHtml(searchQuery)}".</div>`;
+            return;
+        }
 
-                card.innerHTML = `
-                    <div class="day-num">${i}</div>
-                    <div class="day-workout">${subtext}</div>
-                    <div class="day-check">${isLogged ? '✅' : ''}</div>
+        listEl.innerHTML = filtered.map(food => `
+            <div class="food-row">
+                <div class="food-info">
+                    <span class="food-name">${food.name}</span>
+                    <span class="food-details">${food.calories} calories · ${food.protein}g protein</span>
+                </div>
+                <button class="btn btn-primary" id="add-btn-${food.id}" onclick="addPresetFood('${food.id}', this)">+ Add</button>
+            </div>
+        `).join('');
+    }
+
+    function renderRecentDays() {
+        const targetCal = parseInt(dietTarget.calories) || 2000;
+        const dates = Object.keys(dietLogs)
+            .filter(d => getEntriesForDate(d).length > 0)
+            .sort((a, b) => new Date(b) - new Date(a))
+            .slice(0, 7);
+
+        let html = "";
+        if (dates.length === 0) {
+            html = `<div class="empty-note">No past days recorded yet.</div>`;
+        } else {
+            html = dates.map(d => {
+                const entries = getEntriesForDate(d);
+                const tot = calculateTotals(entries);
+                const cal = Math.round(tot.calories);
+                const pro = Math.round(tot.protein);
+                const hit = cal >= targetCal;
+
+                return `
+                    <button class="history-row" onclick="changeDietDate('${d}')">
+                        <div class="food-info">
+                            <span class="food-name">${formatFriendlyDate(d)}</span>
+                            <span class="food-details">${entries.length} ${entries.length === 1 ? 'item' : 'items'}</span>
+                        </div>
+                        <div style="text-align:right;">
+                            <div style="font-weight:800; font-size:1.05rem;">${cal} cal</div>
+                            <div style="font-size:0.9rem; color:${hit ? 'var(--accent)' : 'var(--text-muted)'}; font-weight:700;">
+                                ${pro}g protein ${hit ? '· Goal ✓' : ''}
+                            </div>
+                        </div>
+                    </button>
                 `;
-                
-                if(info.type !== 'pre') {
-                    card.onclick = () => openModal(dateStr);
-                }
-                
-                grid.appendChild(card);
-            }
+            }).join('');
         }
 
-        function updateStats() {
-            // Count Completed
-            const count = Object.keys(logs).length;
-            document.getElementById('completed-val').innerText = count;
+        document.getElementById('recent-days-section').innerHTML = `
+            <div class="card-header">
+                <h2 class="card-title">Recent Days</h2>
+                <span style="font-size:0.9rem; color:var(--text-muted);">Tap a day to view</span>
+            </div>
+            <div class="food-list">${html}</div>
+        `;
+    }
 
-            // Current Program Day
-            const todayStr = today.toISOString().split('T')[0];
-            const info = getProgramInfo(todayStr);
-            document.getElementById('program-day-val').innerText = info.dayNum > 0 ? info.dayNum : '-';
+    function renderAll() {
+        renderDateBar();
+        renderSummary();
+        renderLoggedFoods();
+        renderCustomForm();
+        renderQuickFoodList();
+        renderRecentDays();
+    }
 
-            // Streak (Backwards from yesterday/today)
-            let streak = 0;
-            let d = new Date();
-            // Check today first, if not done, check yesterday to start streak count
-            if(!logs[d.toISOString().split('T')[0]]) d.setDate(d.getDate() - 1);
-            
-            while(true) {
-                const s = d.toISOString().split('T')[0];
-                if(logs[s]) { streak++; d.setDate(d.getDate() - 1); }
-                else break;
-            }
-            document.getElementById('streak-val').innerText = streak;
+    // Actions
+    function changeDietDate(dateStr) {
+        if (!dateStr) return;
+        selectedDate = dateStr;
+        renderAll();
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function shiftDate(days) {
+        const d = new Date(selectedDate + "T12:00:00");
+        d.setDate(d.getDate() + days);
+        const nextStr = new Date(d.getTime() - d.getTimezoneOffset() * 60000).toISOString().split('T')[0];
+        changeDietDate(nextStr);
+    }
+
+    function goToToday() {
+        changeDietDate(getLocalDateStr(0));
+    }
+
+    function toggleGoalEditor() {
+        showGoalEditor = !showGoalEditor;
+        renderSummary();
+    }
+
+    function saveGoals() {
+        const cal = parseInt(document.getElementById('goal-cal-input').value);
+        const pro = parseInt(document.getElementById('goal-pro-input').value) || 0;
+        if (!cal || cal <= 0) {
+            alert("Please enter a daily calorie goal.");
+            return;
+        }
+        dietTarget = { calories: cal, protein: pro };
+        localStorage.setItem('simple_diet_target_cache', JSON.stringify(dietTarget));
+        if (dietTargetDbRef) dietTargetDbRef.set(dietTarget);
+        showGoalEditor = false;
+        renderSummary();
+        renderRecentDays();
+        showToast("Goal updated");
+    }
+
+    function toggleCustomFoodForm() {
+        showCustomForm = !showCustomForm;
+        renderCustomForm();
+    }
+
+    function handleSearchInput(val) {
+        searchQuery = val;
+        renderQuickFoodList();
+    }
+
+    function clearSearch() {
+        searchQuery = "";
+        document.getElementById('food-search').value = "";
+        renderQuickFoodList();
+    }
+
+    function saveEntry(entry) {
+        if (!dietLogs[selectedDate]) dietLogs[selectedDate] = { entries: {} };
+        if (!dietLogs[selectedDate].entries) dietLogs[selectedDate].entries = {};
+        dietLogs[selectedDate].entries[entry.id] = entry;
+
+        localStorage.setItem('simple_diet_log_cache', JSON.stringify(dietLogs));
+        if (dietDbRef) {
+            setSyncText("Saving...");
+            dietDbRef.child(selectedDate).child('entries').child(entry.id).set(entry)
+                .then(() => setSyncText("Saved ✓"))
+                .catch(() => setSyncText("Saved locally"));
         }
 
-        // --- MODAL FUNCTIONS ---
-        const modal = document.getElementById('workout-modal');
-        const settingsModal = document.getElementById('settings-modal');
+        renderSummary();
+        renderLoggedFoods();
+        renderRecentDays();
+    }
 
-        function openModal(dateStr) {
-            currentModalDateStr = dateStr;
-            const info = getProgramInfo(dateStr);
-            const data = logs[dateStr] || {};
+    function addPresetFood(foodId, btnEl) {
+        const food = DIET_FOODS.find(f => f.id === foodId);
+        if (!food) return;
 
-            document.getElementById('modal-date-display').innerText = new Date(dateStr).toLocaleDateString('en-US', { month:'short', day:'numeric'});
-            document.getElementById('modal-phase-tag').innerText = `PHASE ${info.phase} • DAY ${info.dayNum}`;
-            document.getElementById('modal-workout-name').innerText = info.label;
+        const entry = {
+            id: `food_${Date.now()}_${Math.floor(Math.random() * 1000)}`,
+            name: food.name,
+            calories: food.calories,
+            protein: food.protein,
+            carbs: food.carbs,
+            fat: food.fat,
+            timestamp: Date.now()
+        };
 
-            // Habits
-            document.getElementById('habit-water').checked = data.habits?.water || false;
-            document.getElementById('habit-steps').checked = data.habits?.steps || false;
-            document.getElementById('habit-protein').checked = data.habits?.protein || false;
+        saveEntry(entry);
+        showToast(`Added ${food.name}`);
 
-            // Build List
-            const listContainer = document.getElementById('exercise-list');
-            listContainer.innerHTML = '';
+        if (btnEl) {
+            btnEl.textContent = "Added ✓";
+            btnEl.classList.add('added');
+            setTimeout(() => {
+                btnEl.textContent = "+ Add";
+                btnEl.classList.remove('added');
+            }, 900);
+        }
+    }
 
-            if(info.type === 'rest') {
-                listContainer.innerHTML = `<div style="text-align:center; padding:20px; color:#94a3b8">Active Recovery Day.<br>Focus on stretching, walking, and hydration.</div>`;
-            } else {
-                info.list.forEach(ex => {
-                    const sets = data.exercises?.[ex.name] || [];
-                    const setTarget = parseInt(ex.target.match(/\d+/)[0]) || 3;
-                    
-                    let inputs = '';
-                    for(let i=0; i<setTarget; i++) {
-                        inputs += `<input type="text" placeholder="${i+1}" value="${sets[i] || ''}" data-ex="${ex.name}">`;
-                    }
+    function addCustomFood() {
+        const name = (document.getElementById('custom-name').value || '').trim();
+        const cal = parseFloat(document.getElementById('custom-cal').value) || 0;
+        const pro = parseFloat(document.getElementById('custom-pro').value) || 0;
+        const carb = parseFloat(document.getElementById('custom-carb').value) || 0;
+        const fat = parseFloat(document.getElementById('custom-fat').value) || 0;
 
-                    const row = document.createElement('div');
-                    row.className = 'exercise-block';
-                    row.innerHTML = `
-                        <div class="ex-header"><span>${ex.name}</span> <span class="ex-target">${ex.target}</span></div>
-                        <div class="set-inputs">${inputs}</div>
-                    `;
-                    listContainer.appendChild(row);
-                });
-            }
-
-            modal.classList.remove('hidden');
+        if (!name || cal <= 0) {
+            alert("Please enter both a food name and calories.");
+            return;
         }
 
-        document.getElementById('save-log-btn').onclick = () => {
-            const inputs = document.querySelectorAll('.exercise-block input');
-            let exercises = {};
-            let hasData = false;
-
-            inputs.forEach(inp => {
-                const name = inp.dataset.ex;
-                if(!exercises[name]) exercises[name] = [];
-                exercises[name].push(inp.value);
-                if(inp.value) hasData = true;
-            });
-
-            const habits = {
-                water: document.getElementById('habit-water').checked,
-                steps: document.getElementById('habit-steps').checked,
-                protein: document.getElementById('habit-protein').checked
-            };
-
-            if(hasData || habits.water || habits.steps || habits.protein) {
-                logs[currentModalDateStr] = { exercises, habits };
-                confetti({ origin: { y: 0.7 } });
-            } else {
-                delete logs[currentModalDateStr];
-            }
-
-            localStorage.setItem('shred26_logs', JSON.stringify(logs));
-            modal.classList.add('hidden');
-            renderCalendar();
-            updateStats();
+        const entry = {
+            id: `food_${Date.now()}_${Math.floor(Math.random() * 1000)}`,
+            name: name,
+            calories: cal,
+            protein: pro,
+            carbs: carb,
+            fat: fat,
+            timestamp: Date.now()
         };
 
-        document.getElementById('close-log-btn').onclick = () => modal.classList.add('hidden');
+        saveEntry(entry);
+        showCustomForm = false;
+        renderCustomForm();
+        showToast(`Added ${name}`);
+    }
 
-        // --- SETTINGS ---
-        document.getElementById('settings-btn').onclick = () => settingsModal.classList.remove('hidden');
-        document.getElementById('close-settings-btn').onclick = () => settingsModal.classList.add('hidden');
-        
-        document.getElementById('save-settings-btn').onclick = () => {
-            const val = document.getElementById('start-date-input').value;
-            if(val) {
-                settings.startDate = val;
-                localStorage.setItem('shred26_settings', JSON.stringify(settings));
-                location.reload();
-            }
-        };
+    function removeEntry(dateStr, entryId) {
+        if (dietLogs[dateStr] && dietLogs[dateStr].entries) {
+            delete dietLogs[dateStr].entries[entryId];
+        }
+        localStorage.setItem('simple_diet_log_cache', JSON.stringify(dietLogs));
+        if (dietDbRef) {
+            dietDbRef.child(dateStr).child('entries').child(entryId).remove();
+        }
+        renderSummary();
+        renderLoggedFoods();
+        renderRecentDays();
+        showToast("Food removed");
+    }
 
-        document.getElementById('reset-btn').onclick = () => {
-            if(confirm("Delete all history and reset?")) {
-                localStorage.clear();
-                location.reload();
-            }
-        };
-
-    </script>
+    window.onload = renderAll;
+</script>
 </body>
 </html>
