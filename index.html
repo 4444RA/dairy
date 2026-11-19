@@ -1,9 +1,9 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
         <link rel="apple-touch-icon" href="wonder.png">
 
+    <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <meta name="theme-color" content="#f5f4ef">
     <title>Daily Food Tracker</title>
@@ -331,13 +331,6 @@
             padding: 8px 0;
         }
 
-        /* Search Bar */
-        .search-row {
-            display: flex;
-            gap: 8px;
-            align-items: center;
-        }
-
         /* Past Days */
         .history-row {
             background: var(--soft-bg);
@@ -423,21 +416,6 @@
         </div>
 
         <div id="custom-food-container"></div>
-
-        <div class="field-group">
-            <label for="food-search" class="field-label">Find a food</label>
-            <div class="search-row">
-                <input
-                    type="text"
-                    id="food-search"
-                    class="text-input"
-                    placeholder="Type e.g. eggs, chicken, banana..."
-                    oninput="handleSearchInput(this.value)"
-                >
-                <button id="clear-search-btn" class="btn btn-small" style="display:none;" onclick="clearSearch()">Clear</button>
-            </div>
-        </div>
-
         <div id="quick-food-list" class="food-list"></div>
     </section>
 
@@ -474,22 +452,10 @@
     }
 
     const DIET_FOODS = [
-        { id: "eggs_2", name: "Eggs (2 large)", calories: 144, protein: 13, carbs: 1, fat: 10 },
-        { id: "ice_cream", name: "Ice cream (100g)", calories: 207, protein: 4, carbs: 24, fat: 11 },
-        { id: "lasagne", name: "Lasagne (1 serving)", calories: 750, protein: 45, carbs: 50, fat: 35 },
-        { id: "stroganoff", name: "Stroganoff (1 meal)", calories: 650, protein: 35, carbs: 65, fat: 25 },
-        { id: "tuna_tin", name: "Tuna tin (95g drained)", calories: 110, protein: 24, carbs: 0, fat: 1 },
-        { id: "bread_2", name: "Bread (2 slices)", calories: 200, protein: 8, carbs: 36, fat: 3 },
-        { id: "potato_300", name: "Potato (300g)", calories: 261, protein: 6, carbs: 60, fat: 0 },
-        { id: "banana_1", name: "Banana (1 medium)", calories: 105, protein: 1, carbs: 27, fat: 0 },
-        { id: "oats_80", name: "Oats (1 cup / 80g)", calories: 303, protein: 11, carbs: 54, fat: 6 },
-        { id: "peanut_butter", name: "Peanut butter (1 tbsp)", calories: 95, protein: 4, carbs: 4, fat: 8 },
-        { id: "milo_bar", name: "Milo bar (1 bar)", calories: 160, protein: 3, carbs: 24, fat: 6 },
-        { id: "salmon_100", name: "Salmon (100g)", calories: 206, protein: 22, carbs: 0, fat: 13 },
-        { id: "pizza_serving", name: "Pizza (1 serving)", calories: 975, protein: 38, carbs: 154, fat: 23 },
-        { id: "milk_100ml", name: "Milk (100ml full cream)", calories: 64, protein: 3, carbs: 5, fat: 4 },
-        { id: "chicken_150", name: "Chicken breast (150g cooked)", calories: 248, protein: 46, carbs: 0, fat: 5 },
-        { id: "sweet_potato_300", name: "Sweet potato (300g)", calories: 270, protein: 5, carbs: 63, fat: 0 }
+        { id: "coke_365", name: "Coke can (365ml)", calories: 157, protein: 0, carbs: 38.7, fat: 0 },
+        { id: "smiths_original_45", name: "Smith's Chips Original (45g)", calories: 246, protein: 3, carbs: 22.8, fat: 15.7 },
+        { id: "lasagne_small", name: "Lasagne (small portion)", calories: 500, protein: 30, carbs: 33, fat: 23 },
+        { id: "cheese_crackers_38", name: "Cheese & Crackers (38g pack)", calories: 155, protein: 7.4, carbs: 9.3, fat: 9.8 }
     ];
 
     function getLocalDateStr(offsetDays = 0) {
@@ -516,6 +482,10 @@
         return formatted;
     }
 
+    function formatNum(n) {
+        return Number((parseFloat(n) || 0).toFixed(1));
+    }
+
     function escapeHtml(str) {
         return String(str || '')
             .replace(/&/g, "&amp;")
@@ -528,7 +498,6 @@
     let dietLogs = JSON.parse(localStorage.getItem('simple_diet_log_cache')) || {};
     let dietTarget = JSON.parse(localStorage.getItem('simple_diet_target_cache')) || { calories: 2000, protein: 100 };
     let selectedDate = getLocalDateStr(0);
-    let searchQuery = "";
     let showGoalEditor = false;
     let showCustomForm = false;
     let toastTimer = null;
@@ -597,9 +566,9 @@
         const entries = getEntriesForDate(selectedDate);
         const totals = calculateTotals(entries);
         const cal = Math.round(totals.calories);
-        const pro = Math.round(totals.protein);
-        const carb = Math.round(totals.carbs);
-        const fat = Math.round(totals.fat);
+        const pro = formatNum(totals.protein);
+        const carb = formatNum(totals.carbs);
+        const fat = formatNum(totals.fat);
 
         const targetCal = parseInt(dietTarget.calories) || 2000;
         const targetPro = parseInt(dietTarget.protein) || 0;
@@ -682,7 +651,7 @@
                     <div class="food-info">
                         <span class="food-name">${escapeHtml(item.name)}</span>
                         <span class="food-details">
-                            ${Math.round(item.calories)} calories · ${Math.round(item.protein)}g protein
+                            ${Math.round(item.calories)} calories · ${formatNum(item.protein)}g protein
                         </span>
                     </div>
                     <button class="btn btn-danger" onclick="removeEntry('${selectedDate}', '${item.id}')">Remove</button>
@@ -724,17 +693,17 @@
                     </div>
                     <div class="field-group">
                         <label class="field-label" for="custom-pro">Protein (g)</label>
-                        <input type="number" id="custom-pro" class="text-input" placeholder="Optional">
+                        <input type="number" step="0.1" id="custom-pro" class="text-input" placeholder="Optional">
                     </div>
                 </div>
                 <div class="two-col">
                     <div class="field-group">
                         <label class="field-label" for="custom-carb">Carbs (g)</label>
-                        <input type="number" id="custom-carb" class="text-input" placeholder="Optional">
+                        <input type="number" step="0.1" id="custom-carb" class="text-input" placeholder="Optional">
                     </div>
                     <div class="field-group">
                         <label class="field-label" for="custom-fat">Fat (g)</label>
-                        <input type="number" id="custom-fat" class="text-input" placeholder="Optional">
+                        <input type="number" step="0.1" id="custom-fat" class="text-input" placeholder="Optional">
                     </div>
                 </div>
                 <button class="btn btn-primary" onclick="addCustomFood()">Add This Food to Today</button>
@@ -743,22 +712,13 @@
     }
 
     function renderQuickFoodList() {
-        const q = searchQuery.trim().toLowerCase();
-        const filtered = DIET_FOODS.filter(f => !q || f.name.toLowerCase().includes(q));
         const listEl = document.getElementById('quick-food-list');
 
-        document.getElementById('clear-search-btn').style.display = q ? 'inline-flex' : 'none';
-
-        if (filtered.length === 0) {
-            listEl.innerHTML = `<div class="empty-note">No foods matched "${escapeHtml(searchQuery)}".</div>`;
-            return;
-        }
-
-        listEl.innerHTML = filtered.map(food => `
+        listEl.innerHTML = DIET_FOODS.map(food => `
             <div class="food-row">
                 <div class="food-info">
                     <span class="food-name">${food.name}</span>
-                    <span class="food-details">${food.calories} calories · ${food.protein}g protein</span>
+                    <span class="food-details">${food.calories} calories · ${formatNum(food.protein)}g protein</span>
                 </div>
                 <button class="btn btn-primary" id="add-btn-${food.id}" onclick="addPresetFood('${food.id}', this)">+ Add</button>
             </div>
@@ -780,7 +740,7 @@
                 const entries = getEntriesForDate(d);
                 const tot = calculateTotals(entries);
                 const cal = Math.round(tot.calories);
-                const pro = Math.round(tot.protein);
+                const pro = formatNum(tot.protein);
                 const hit = cal >= targetCal;
 
                 return `
@@ -861,17 +821,6 @@
     function toggleCustomFoodForm() {
         showCustomForm = !showCustomForm;
         renderCustomForm();
-    }
-
-    function handleSearchInput(val) {
-        searchQuery = val;
-        renderQuickFoodList();
-    }
-
-    function clearSearch() {
-        searchQuery = "";
-        document.getElementById('food-search').value = "";
-        renderQuickFoodList();
     }
 
     function saveEntry(entry) {
